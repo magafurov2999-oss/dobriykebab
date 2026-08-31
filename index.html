@@ -18,20 +18,32 @@
   Домен зашивается в код — печатать до выбора домена нельзя.
 
   ── КАК ОБНОВИТЬ МЕНЮ ─────────────────────────────────────────────
-  Всё меню — массив MENU в начале скрипта. Разметка, фильтры
-  и счётчики пересобираются сами.
+  Всё меню — массив MENU в начале скрипта. Разметка, фильтры,
+  счётчики категорий и разбивка по филиалам пересобираются сами.
 
-    {c:'shaurma', ru:'Шаурма классическая', p:280, w:'350 г',
-     d:'Курица, овощи, соус', hot:true, img:'photo/shaurma.jpg'}
+    {c:'burger', ru:'Блэк бургер', p:460, w:'320 г', img:'photo/burger-blek.png',
+     d:'Телятина, халапеньо, чеддер', img:'photo/black.jpeg'}
+
+    {c:'pizza', ru:'Пепперончес', v:VP, p:[499,659],
+     img:'photo/pizza-pepperonches.jpeg'}
 
     c    категория (список — в массиве CATS выше)
-    ru   название, оно же ключ корзины — ДОЛЖНО БЫТЬ УНИКАЛЬНЫМ
-    p    цена: 280 — одна на оба кафе
-              {genina:520,'8marta':560} — разные
-              {genina:390} — только на де Геннина
-         нет ключа филиала = позиция там не показывается
+    ru   название
+    p    цена. Число — одна цена. Массив — цены вариантов
+         в том же порядке, что подписи в v
+    v    подписи вариантов: VM курица/говядина, VP 300/500 г,
+         VC 230/330 мл, либо свой массив
     w    вес или размер, d — состав, hot — острое
     img  путь к фото (необязательно)
+    only 'genina' или '8marta' — позиция только в одном кафе
+
+  ГДЕ ЧТО ПРОДАЁТСЯ задаётся не у позиции, а у КАТЕГОРИИ полем only.
+  Сейчас супы, паста, салаты, шашлык и овощи на углях — только
+  8 Марта; всё остальное в обоих кафе.
+
+  Ключ корзины строится сам: название, плюс вариант, плюс категория,
+  если название повторяется («4 сыра» есть и в шаурме, и в пицце).
+  Дубли ключей страница ловит при загрузке и пишет в консоль.
 
   ── НОМЕР ЗАКАЗА ──────────────────────────────────────────────────
   Номер выдаёт общий счётчик в Google-таблице: она одна на всех, и
@@ -46,30 +58,50 @@
   Так же он ведёт себя, если таблица не ответила за 4 секунды —
   заказ уходит без номера, а не теряется.
 
+  ── ЛОГОТИП ───────────────────────────────────────────────────────
+  logo.jpg — настоящий логотип заказчика, 1280×1280.
+  Он нарисован НА ЧЁРНОМ, поэтому на первом экране стоит чёрной
+  плашкой внутри красного поля: подложка знака работает как часть
+  композиции. Замените файл — ничего править не нужно, лишь бы
+  оставался квадратным.
+
+  В шапке — то же пламя отдельным файлом logo-mark.png с прозрачным
+  фоном: полный логотип с надписью на высоте 26px нечитаем.
+  Кадрировать logo.jpg средствами CSS не вышло — любое окно, вмещающее
+  пламя целиком, задевало серые диагонали рамки-шеврона, а окно
+  в обход рамки резало само пламя.
+  Заменили logo.jpg — перевыпустите знак: python scripts/make-mark.py
+  (нужен pymupdf). Скрипт печатает новый размер, поставьте его
+  в атрибуты width и height у картинки с классом head-mark.
+
   ── ФОТОГРАФИИ ────────────────────────────────────────────────────
-  Фото пока нет, страница спроектирована под них и работает без них.
-  Когда снимки будут:
-    · положите файлы в папку photo/ рядом с index.html;
-    · пропишите img у позиций;
-    · для первого экрана положите photo/hero.jpg и раскомментируйте
-      строку --hero-shot в правиле .hero-panel — снимок займёт правый
-      блок вместо красного поля со знаком.
-  Квадратный кадр, от 600×600. Добавляйте фото ЦЕЛОЙ КАТЕГОРИЕЙ:
+  41 снимок в photo/ вырезан из печатного меню заказчика. Разрешение
+  исходников небольшое (205–500 px) — для кадра 70×70 в списке хватает
+  с запасом, для крупной подачи понадобятся оригиналы от фотографа.
+
+  ФОТО НЕТ У ШАУРМЫ И БУРГЕРОВ — в исходном меню их не было. Это
+  18 позиций, и именно они продаются чаще всего. Строка без снимка
+  выглядит опрятно, но со снимком продаёт заметно лучше.
+
+  Добавить фото: положить файл в photo/ и прописать img у позиции.
+  Квадратный кадр, от 600×600. Снимать лучше ЦЕЛОЙ КАТЕГОРИЕЙ:
   вперемешку с фото и без выглядит неряшливо.
   Стоки и нейрокартинки не ставить — их видно, и они вредят.
 
-  ── ЧТО ЕЩЁ ЗАГЛУШКА ──────────────────────────────────────────────
-  ВЫМЫШЛЕНО ТОЛЬКО МЕНЮ: позиции, состав и цены — чтобы механизм
-  разных меню было видно и можно было проверить.
+  Для первого экрана: положить photo/hero.jpg и раскомментировать
+  строку --hero-shot в правиле .hero-panel — снимок займёт правый
+  блок вместо логотипа.
 
-  Адреса, районы, часы и рейтинги настоящие, с карточек 2ГИС:
+  ── ЧТО ЕЩЁ НЕ РЕШЕНО ─────────────────────────────────────────────
+  Меню, цены, состав и вес — настоящие, с печатного меню заказчика.
+  Адреса, районы, часы и рейтинги — с карточек 2ГИС:
     де Геннина, 34   Академический р-н, 620105, ежедневно 11:00–01:00
     8 Марта, 12      Ленинский р-н, 620014, круглосуточно
   Рейтинг 4.7: 151 оценка на де Геннина, 193 на 8 Марта.
 
-  Ждём от заказчика: настоящее меню с ценами по филиалам; домен;
-  подтверждение часов на де Геннина (2ГИС пишет, что данные давно
-  не обновлялись); написание — «Де Генина» или «де Геннина».
+  Ждём от заказчика: домен; подтверждение часов на де Геннина (2ГИС
+  пишет, что данные давно не обновлялись); написание — «Де Генина»
+  или «де Геннина»; фото шаурмы и бургеров.
 
   ── ДОСТУПНОСТЬ ───────────────────────────────────────────────────
   WCAG 2.2 AA. Контрасты посчитаны, замеры — в комментарии к палитре.
@@ -224,7 +256,18 @@ p,li{text-wrap:pretty}
 .head-brand{display:flex;align-items:center;gap:11px;text-decoration:none;
   margin-right:auto;min-width:0;min-height:44px}
 .head-brand:hover{color:inherit}
-.head-mark{width:26px;flex:0 0 auto}
+/* Знак в шапке — то самое пламя из logo.jpg, кадрированное фоном.
+   Полный логотип с надписью на высоте 26px нечитаем, а отдельный файл
+   заводить незачем: logo.jpg уже загружен для первого экрана.
+   Пламя занимает в исходнике область 553..726 по x и 326..559 по y
+   (из 1280×1280) — отсюда масштаб и смещения ниже.
+   mix-blend-mode:screen гасит чёрную подложку логотипа: screen с чёрным
+   не меняет фон, поэтому шва на тёмной шапке не видно. */
+/* Пламя вырезано из logo.jpg отдельным файлом с прозрачным фоном
+   (scripts/make-mark.py). Кадрировать логотип средствами CSS не вышло:
+   любое окно, вмещающее пламя целиком, задевало серые диагонали
+   рамки-шеврона, а обход рамки резал само пламя. */
+.head-mark{height:26px;width:auto;flex:0 0 auto}
 .head-word{font-family:var(--disp);font-weight:800;font-size:15px;
   letter-spacing:-.02em;text-transform:uppercase;color:var(--paper);white-space:nowrap}
 .head-cafe{
@@ -278,12 +321,24 @@ p,li{text-wrap:pretty}
   position:relative;min-height:min(58vh,460px);
   /* --hero-shot:url('photo/hero.jpg'); */
   background:var(--red-field) var(--hero-shot,none) center/cover no-repeat;
-  display:grid;place-items:center;padding:28px;
+  display:grid;place-items:stretch;padding:clamp(16px,2.2vw,30px);
 }
 /* Когда снимок встанет, знак поверх него мешает — прячем. */
-.hero-panel[style*="--hero-shot"] .mark,
-.hero-panel.has-shot .mark{display:none}
-.hero-panel .mark{width:min(300px,74%)}
+.hero-panel[style*="--hero-shot"] .logo-plate,
+.hero-panel.has-shot .logo-plate{display:none}
+/* Плашка занимает поле целиком, красное остаётся ровной рамкой по
+   padding. В самом файле логотипа вокруг знака свои чёрные поля —
+   подрезаем их, увеличивая картинку и обрезая по плашке, иначе
+   надпись тонет в трёх вложенных рамках. */
+/* Плашка держит квадрат по высоте поля: логотип квадратный, и на
+   широком низком поле (одна колонка) он иначе обрезался по вертикали —
+   у шестиугольника срезало верх и низ. */
+.logo-plate{position:relative;height:100%;aspect-ratio:1;margin-inline:auto;
+  background:#000;overflow:hidden}
+/* Картинку выводим из потока: иначе увеличенная до 118% она сама
+   растягивала плашку по высоте, и первый экран рос вслед за ней. */
+.logo-plate .logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:118%;max-width:none;height:auto}
 
 /* ── кнопки ──────────────────────────────────────────────── */
 .btn{
@@ -345,13 +400,25 @@ p,li{text-wrap:pretty}
 .chip small{font-family:var(--sans);font-weight:500;font-size:12px;opacity:.7}
 .chip[aria-pressed="true"]{color:var(--gold);border-bottom-color:var(--gold)}
 
+/* Заголовок меню и знак халяль в один ряд: знак попадает в поле зрения
+   там же, где гость читает, чьё это меню.
+   Знак сохранён в своих цветах: это отметка о сертификации, а не
+   элемент фирменного стиля, и подгонять её под палитру неправильно. */
+.menu-head{display:grid;grid-template-columns:1fr auto;gap:clamp(20px,3vw,48px);
+  align-items:start}
+.halal{width:clamp(76px,7.5vw,104px);height:auto}
+
 .cat + .cat{margin-top:clamp(34px,4vw,58px)}
 .cat-name{margin:0 0 2px;padding-bottom:12px;border-bottom:1px solid var(--hair-2);
   font-size:clamp(16px,1.7vw,20px);color:var(--paper)}
 .list{list-style:none;margin:0;padding:0;display:grid;
   grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:0 clamp(28px,3.5vw,56px)}
-.row{display:grid;grid-template-columns:auto 1fr auto auto;gap:0 16px;align-items:center;
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:0 16px;align-items:center;
   padding:15px 0;border-bottom:1px solid var(--hair)}
+/* Цена и счётчик — одним блоком: на телефоне он целиком уезжает
+   под описание, иначе название ломается на три строки, а цифры
+   с кнопкой зажимаются в угол. */
+.row-buy{display:flex;align-items:center;gap:14px}
 .row-shot{width:70px;height:70px;object-fit:cover;background:var(--ink-3);border-radius:2px}
 .row-body{min-width:0}
 .row-name{margin:0;font-family:var(--disp);font-weight:700;font-size:16px;
@@ -363,6 +430,15 @@ p,li{text-wrap:pretty}
 .row-price{font-family:var(--disp);font-weight:800;font-size:20px;letter-spacing:-.03em;
   color:var(--gold);white-space:nowrap;padding-right:4px}
 .row-price i{font-style:normal;font-size:13.5px;color:var(--paper-dim);margin-left:2px}
+/* Позиция с вариантами (курица/говядина, 300/500 г, 230/330 мл):
+   цена и счётчик на каждый вариант отдельной строкой под описанием.
+   В один ряд четыре цифры и два счётчика на телефон не помещаются. */
+.row-multi{grid-template-columns:auto 1fr;align-items:start}
+.opts{grid-column:2;display:grid;gap:6px;margin-top:10px}
+.opt{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;
+  padding-top:6px;border-top:1px solid var(--hair)}
+.opt:first-child{border-top:0;padding-top:0}
+.opt-name{font-size:13.5px;color:var(--paper-dim)}
 .row[data-in]{background:linear-gradient(90deg,rgba(46,156,99,.09),transparent 70%)}
 
 /* счётчик: пока пусто — одна кнопка, дальше − N + */
@@ -382,20 +458,6 @@ p,li{text-wrap:pretty}
 .empty-cat{margin:0;padding:44px 0;color:var(--paper-dim);border-bottom:1px solid var(--hair)}
 
 /* ── доставка ────────────────────────────────────────────── */
-.delivery{background:var(--red-field);color:var(--paper)}
-.delivery .lede{color:rgba(244,241,234,.86)}
-.delivery a{color:var(--paper)}
-/* Номера здесь несут смысл: это порядок шагов, а не украшение. */
-.steps{list-style:none;margin:0;padding:0;display:grid;gap:1px;
-  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));background:rgba(244,241,234,.24)}
-.steps li{background:var(--red-field);padding:24px 22px;counter-increment:s}
-.steps{counter-reset:s}
-.steps li::before{content:counter(s,decimal-leading-zero);display:block;
-  font-family:var(--disp);font-weight:800;font-size:15px;color:rgba(244,241,234,.62);margin-bottom:14px}
-.steps b{display:block;font-family:var(--disp);font-weight:700;font-size:16px;
-  text-transform:uppercase;letter-spacing:-.02em;margin-bottom:7px}
-.steps p{margin:0;font-size:13.5px;color:rgba(244,241,234,.86);line-height:1.45}
-
 /* ── контакты и подвал ───────────────────────────────────── */
 .note{display:flex;gap:12px;align-items:flex-start;margin-top:24px;
   border:1px solid var(--green);padding:16px 18px;font-size:15px}
@@ -452,6 +514,15 @@ dialog::backdrop{background:var(--scrim)}
 .cart-empty{padding:50px 0;color:var(--paper-dim)}
 .cart-empty .ico{width:46px;height:46px;fill:var(--ink-4);margin-bottom:14px}
 
+/* Разбивка суммы показывается только при доставке — без неё одна
+   строка «Итого» понятнее, чем две одинаковые. */
+.sum-line{display:flex;justify-content:space-between;gap:12px;margin:0;
+  font-size:13.5px;color:var(--paper-dim)}
+.sum-line b{color:var(--paper);font-weight:600}
+/* Цена доставки видна на переключателе до выбора, а не только после. */
+.seg small{display:block;font-family:var(--sans);font-weight:500;font-size:12px;
+  letter-spacing:0;text-transform:none;opacity:.72;margin-top:2px}
+.seg label:has(input:checked) small{opacity:.85}
 .total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0;
   font-family:var(--disp);font-weight:700;text-transform:uppercase;font-size:13.5px;letter-spacing:-.01em}
 .total b{font-family:var(--disp);font-weight:800;font-size:27px;letter-spacing:-.035em;color:var(--gold)}
@@ -513,7 +584,7 @@ dialog::backdrop{background:var(--scrim)}
 @media (max-width:960px){
   .hero-in{grid-template-columns:1fr;gap:0}
   .hero-panel{order:-1;min-height:min(38vh,300px);margin-bottom:30px}
-  .hero-panel .mark{width:min(240px,64%)}
+  .hero-panel{min-height:min(38vh,290px)}
 }
 @media (max-width:820px){
   .cart-btn span:not(.cart-count){display:none}
@@ -524,9 +595,9 @@ dialog::backdrop{background:var(--scrim)}
   body{font-size:16px}
   .head-in{gap:8px}
   .head-word,.head-cafe .cafe-lbl{display:none}
-  /* Остаётся один знак шириной 26px — добираем зону нажатия до 44
+  /* Остаётся один знак шириной 19px — добираем зону нажатия до 44
      полями, отрицательный отступ держит знак прижатым к краю. */
-  .head-brand{padding-inline:9px;margin-left:-9px}
+  .head-brand{padding-inline:13px;margin-left:-13px}
   .head-cafe{padding:9px 13px}
   .sheet{width:100%;inset:auto 0 0 0;height:min(92dvh,100%);border-left:0;border-top:1px solid var(--hair-2)}
   @keyframes sheet-in{from{transform:translateY(22px);opacity:0}to{transform:none;opacity:1}}
@@ -536,8 +607,14 @@ dialog::backdrop{background:var(--scrim)}
   .line .step .ico{width:17px;height:17px}
   .ask-acts{grid-template-columns:1fr}
   .foot-in{flex-direction:column;align-items:flex-start}
-  .row-shot{width:58px;height:58px}
-  .row{gap:0 12px}
+  /* На телефоне знак уходит под подводку, но остаётся на виду —
+     прямо над вкладками категорий. */
+  .menu-head{grid-template-columns:1fr;justify-items:start}
+  .halal{width:66px;margin-top:10px}
+  .row-shot{width:56px;height:56px}
+  .row{grid-template-columns:auto 1fr;gap:0 12px;align-items:start}
+  .row-buy{grid-column:1/-1;justify-content:flex-end;margin-top:10px}
+  .opts{margin-top:8px}
 }
 @media (min-width:541px){.dock{display:none!important}}
 </style>
@@ -580,10 +657,7 @@ dialog::backdrop{background:var(--scrim)}
 <header class="head">
   <div class="wrap head-in">
     <a class="head-brand" href="#top">
-      <svg class="head-mark" viewBox="0 0 100 100" fill="none" aria-hidden="true">
-        <path d="M50 14C62 37 78 51 78 66a28 28 0 0 1-56 0c0-15 16-29 28-52z" fill="#E8523A"/>
-        <path d="M52 44c8 14 14 18 14 26a16 16 0 0 1-32 0c0-8 10-14 18-26z" fill="#0A0A0A"/>
-      </svg>
+      <img class="head-mark" src="logo-mark.png" width="168" height="228" alt="" aria-hidden="true">
       <span class="head-word">Добрый кебаб</span>
     </a>
 
@@ -625,22 +699,15 @@ dialog::backdrop{background:var(--scrim)}
         </div>
       </div>
 
-      <!-- Красное поле со знаком. Появится photo/hero.jpg — займёт его место. -->
+      <!-- Настоящий логотип заказчика. Он нарисован на чёрном, поэтому
+           стоит чёрной плашкой внутри красного поля: подложка знака
+           становится частью композиции, а не браком.
+           Появится photo/hero.jpg — займёт место логотипа. -->
       <div class="hero-panel">
-        <svg class="mark" viewBox="0 0 400 340" fill="none" aria-hidden="true">
-          <path d="M62 144V96L200 22l138 74v48" stroke="#F4F1EA" stroke-width="12" stroke-linejoin="miter"/>
-          <path d="M62 214v46l138 74 138-74v-46" stroke="#F4F1EA" stroke-width="12" stroke-linejoin="miter"/>
-          <g transform="translate(150 36)">
-            <path d="M50 6C62 29 78 43 78 61a28 28 0 0 1-56 0c0-18 16-32 28-55z" fill="#F4F1EA"/>
-            <path d="M52 40c8 13 13 17 13 25a15 15 0 0 1-30 0c0-8 9-13 17-25z" fill="#B82412"/>
-          </g>
-          <text x="200" y="196" text-anchor="middle" textLength="330" lengthAdjust="spacingAndGlyphs"
-                font-family="Unbounded, sans-serif" font-size="44" font-weight="800"
-                letter-spacing="-1" fill="#F4F1EA">ДОБРЫЙ КЕБАБ</text>
-          <text x="200" y="236" text-anchor="middle" textLength="176" lengthAdjust="spacingAndGlyphs"
-                font-family="Unbounded, sans-serif" font-size="15" font-weight="500"
-                fill="rgba(244,241,234,.8)">FOOD STORY</text>
-        </svg>
+        <div class="logo-plate">
+          <img class="logo" src="logo.jpg" width="1280" height="1280" fetchpriority="high"
+               alt="Добрый кебаб — Food story">
+        </div>
       </div>
     </div>
   </section>
@@ -657,9 +724,15 @@ dialog::backdrop{background:var(--scrim)}
 
   <section class="sec" id="menu" style="padding-top:0">
     <div class="wrap">
-      <div class="sec-head" style="padding-top:clamp(46px,6vw,86px)">
-        <h2 id="menuTitle">Меню</h2>
-        <p class="lede" id="menuLede"></p>
+      <div class="sec-head menu-head" style="padding-top:clamp(46px,6vw,86px)">
+        <div>
+          <h2 id="menuTitle">Меню</h2>
+          <p class="lede" id="menuLede"></p>
+        </div>
+        <!-- Знак халяль вырезан из печатного меню заказчика: он стоит
+             там на каждой странице. Ставим у заголовка меню — это
+             первое, что видит гость, дойдя до списка блюд. -->
+        <img class="halal" src="halal.png" alt="Знак халяль" width="228" height="228">
       </div>
     </div>
 
@@ -674,20 +747,6 @@ dialog::backdrop{background:var(--scrim)}
     </div>
   </section>
 
-  <section class="sec delivery" id="delivery">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>Привезём на такси</h2>
-        <p class="lede">Своей службы доставки у нас нет: мы вызываем такси, а поездку оплачивает гость. Так быстрее и дешевле, чем содержать курьеров: вы платите ровно по счётчику.</p>
-      </div>
-      <ol class="steps">
-        <li><b>Собираете заказ</b><p>Складываете позиции и выбираете «Доставка».</p></li>
-        <li><b>Жмёте одну кнопку</b><p>WhatsApp откроется с готовым текстом: кафе, состав, адрес, время.</p></li>
-        <li><b>Мы подтверждаем</b><p>Отвечаем в чате: номер заказа, сумма, время готовности и примерная цена такси.</p></li>
-        <li><b>Платите водителю</b><p>Заказ едет на такси, поездку оплачиваете напрямую водителю.</p></li>
-      </ol>
-    </div>
-  </section>
 
   <section class="sec" id="contacts">
     <div class="wrap">
@@ -743,7 +802,7 @@ dialog::backdrop{background:var(--scrim)}
     <form id="orderForm" novalidate hidden>
       <div class="seg" role="radiogroup" aria-label="Способ получения">
         <label><input type="radio" name="way" value="pickup" checked><span>Самовывоз</span></label>
-        <label><input type="radio" name="way" value="delivery"><span>Доставка</span></label>
+        <label><input type="radio" name="way" value="delivery"><span>Доставка<small>+600 ₽</small></span></label>
       </div>
 
       <div class="rows">
@@ -770,11 +829,13 @@ dialog::backdrop{background:var(--scrim)}
           <input id="time" name="time" type="time">
         </div>
       </div>
-      <p class="hint" id="taxiHint" hidden>Такси вызываем мы, поездку оплачиваете водителю.</p>
+      <p class="hint" id="taxiHint" hidden>Доставка 600 ₽, уже добавлена к заказу.</p>
     </form>
   </div>
 
   <div class="sheet-foot" id="cartFoot" hidden>
+    <p class="sum-line" id="sumItems" hidden><span>Позиции</span> <b class="num" id="sumGoods">0 ₽</b></p>
+    <p class="sum-line" id="sumDelivery" hidden><span>Доставка</span> <b class="num" id="sumDeliveryVal">600 ₽</b></p>
     <p class="total"><span>Итого</span> <b class="num" id="total">0 ₽</b></p>
     <button class="btn btn-green btn-wide" type="button" id="send">
       <svg class="ico" aria-hidden="true"><use href="#i-wa"/></svg>
@@ -806,6 +867,10 @@ dialog::backdrop{background:var(--scrim)}
 
 const WA = '79644881155';
 
+/* Доставка стоит фиксированно и добавляется к заказу автоматически.
+   Меняется здесь одним числом; 0 — доставка бесплатная. */
+const DELIVERY = 600;
+
 /* Общий счётчик номеров заказа. Сюда вставьте адрес вида
    https://script.google.com/macros/s/AKfy…/exec
    из scripts/order-number.gs — там же расписано, как его получить.
@@ -834,54 +899,167 @@ const CAFES = [
   }
 ];
 
+/* Подписи вариантов — вынесены, чтобы не повторять их в каждой строке. */
+const VM = ['Курица','Говядина'];   /* шаурма */
+const VP = ['300 г','500 г'];       /* пицца */
+const VC = ['230 мл','330 мл'];     /* кофе */
+
 const CATS = [
-  {id:'shaurma', name:'Шаурма'},
-  {id:'burger',  name:'Бургеры'},
-  {id:'pizza',   name:'Пицца'},
-  {id:'snack',   name:'Закуски'},
-  {id:'sauce',   name:'Соусы'},
-  {id:'drink',   name:'Напитки'}
+  {id:'shaurma',   name:'Шаурма'},
+  {id:'pizza',     name:'Пицца'},
+  {id:'hachapuri', name:'Хачапури'},
+  {id:'burger',    name:'Бургеры'},
+  {id:'snack',     name:'Закуски'},
+  {id:'soup',      name:'Супы',            only:'8marta'},
+  {id:'pasta',     name:'Паста',           only:'8marta'},
+  {id:'salad',     name:'Салаты',          only:'8marta'},
+  {id:'grill',     name:'Шашлык',          only:'8marta'},
+  {id:'veg',       name:'Овощи на углях',  only:'8marta'},
+  {id:'coffee',    name:'Кофе'},
+  {id:'teapot',    name:'Чай в чайнике'},
+  {id:'drink',     name:'Напитки'}
 ];
 
-/* ЗАГЛУШКА. Позиции и цены вымышлены — стоят, чтобы механизм разных
-   меню было видно и можно было проверить. Разница между филиалами
-   сделана намеренно. Заменить на настоящее меню. */
+/* Меню перенесено с печатного меню заказчика (PDF от 31.08.2026).
+   Цены одинаковы в обоих кафе; отличается только состав меню —
+   супы, паста, салаты, шашлык и овощи на углях есть лишь на 8 Марта
+   (см. поле only у категорий выше).
+   Фотографии вырезаны из того же PDF, лежат в photo/.
+   У шаурмы и бургеров фото в исходном меню нет. */
 const MENU = [
-  {c:'shaurma', ru:'Шаурма классическая', p:280, w:'350 г', d:'Курица, свежие овощи, фирменный соус'},
-  {c:'shaurma', ru:'Шаурма с говядиной', p:340, w:'380 г', d:'Говядина с огня, овощи, соус'},
-  {c:'shaurma', ru:'Шаурма сырная', p:{genina:320,'8marta':340}, w:'380 г', d:'Курица, двойной сыр, соус чеснок'},
-  {c:'shaurma', ru:'Шаурма острая', p:300, w:'350 г', d:'Курица, халапеньо, острый соус', hot:true},
-  {c:'shaurma', ru:'Шаурма XL', p:{genina:390}, w:'520 г', d:'Двойная порция мяса'},
-  {c:'shaurma', ru:'Шаурма-бокс', p:{'8marta':350}, w:'400 г', d:'В коробке, с картофелем внутри'},
-  {c:'shaurma', ru:'Люля-кебаб в лаваше', p:360, w:'400 г', d:'Баранина с углей, лук, зелень'},
+  /* ── Шаурма ──────────────────────────────────────────── */
+  {c:'shaurma', ru:'Классическая', v:VM, p:[299,399], w:'380 г',
+   d:'Обычный лаваш, чесночный соус, помидоры, огурцы, лук, томатный соус'},
+  {c:'shaurma', ru:'Сырная', v:VM, p:[309,409], w:'380 г',
+   d:'Сырный лаваш, чесночный соус, помидоры, огурцы, лук, томатный соус'},
+  {c:'shaurma', ru:'Чесночная', v:VM, p:[309,409], w:'380 г',
+   d:'Чесночный лаваш, чесночный соус, помидоры, огурцы, лук, томатный соус'},
+  {c:'shaurma', ru:'В пите', v:VM, p:[299,399], w:'350 г',
+   d:'Пита, чесночный соус, помидоры, огурцы, лук, томатный соус'},
+  {c:'shaurma', ru:'Двойная в лаваше', v:VM, p:[449,499], w:'480 г',
+   d:'Обычный лаваш, чесночный соус, помидоры, огурцы, лук, двойное мясо, томатный соус'},
+  {c:'shaurma', ru:'Двойная в пите', v:VM, p:[449,499], w:'450 г',
+   d:'Пита, чесночный соус, помидоры, огурцы, лук, двойное мясо, томатный соус'},
+  {c:'shaurma', ru:'Открытая от шефа', v:VM, p:[499,559], w:'500 г',
+   d:'Лепёшка, халапеньо, огурцы, помидоры, лук, картофель фри, чесночный и томатный соус'},
+  {c:'shaurma', ru:'Бакинский донер', v:VM, p:[459,529], w:'450 г',
+   d:'Булочка чиабатта, помидоры, огурцы, кинза, красный лук, томатный и чесночный соус'},
+  {c:'shaurma', ru:'4 сыра', v:VM, p:[399,499], w:'380 г',
+   d:'Сырный лаваш, помидоры, огурцы, моцарелла, чеддер, сулугуни, пармезан, сырный соус, соус бигтейсти'},
 
-  {c:'burger', ru:'Чизбургер', p:290, w:'240 г', d:'Говяжья котлета, чеддер, овощи'},
-  {c:'burger', ru:'Двойной чизбургер', p:420, w:'380 г', d:'Две котлеты, двойной чеддер'},
-  {c:'burger', ru:'Бургер с курицей', p:280, w:'250 г', d:'Куриная котлета в панировке'},
-  {c:'burger', ru:'Острый бургер', p:{genina:310,'8marta':330}, w:'260 г', d:'Халапеньо, соус чили', hot:true},
-  {c:'burger', ru:'Бургер «Добрый»', p:450, w:'420 г', d:'Две котлеты, бекон, чеддер, соус дня'},
+  /* ── Пицца ───────────────────────────────────────────── */
+  {c:'pizza', ru:'Пепперончес',    v:VP, p:[499,659], img:'photo/pizza-pepperonches.jpeg'},
+  {c:'pizza', ru:'Маргаритос',     v:VP, p:[479,639], img:'photo/pizza-margaritos.jpeg'},
+  {c:'pizza', ru:'4 сыра',         v:VP, p:[519,679], img:'photo/pizza-4-syra.jpeg'},
+  {c:'pizza', ru:'Мясная с сыром', v:VP, p:[599,799], img:'photo/pizza-myasnaya.jpeg'},
+  {c:'pizza', ru:'Бешамельчес',    v:VP, p:[539,699], img:'photo/pizza-beshamelches.jpeg'},
 
-  {c:'pizza', ru:'Маргарита 30 см', p:{genina:450,'8marta':480}, w:'30 см'},
-  {c:'pizza', ru:'Пепперони 30 см', p:{genina:520,'8marta':560}, w:'30 см'},
-  {c:'pizza', ru:'Четыре сыра 30 см', p:{genina:590,'8marta':620}, w:'30 см'},
-  {c:'pizza', ru:'Мясная 30 см', p:{genina:620,'8marta':650}, w:'30 см'},
-  {c:'pizza', ru:'Пицца-кебаб 30 см', p:{'8marta':640}, w:'30 см', d:'Мясо с шаурмы, соус, овощи'},
+  /* ── Хачапури ────────────────────────────────────────── */
+  {c:'hachapuri', ru:'По-аджарски',      p:390, w:'300 г', img:'photo/hachapuri-adjarski.jpeg'},
+  {c:'hachapuri', ru:'Имеретинский',     p:420, w:'400 г', img:'photo/hachapuri-imeritinsky.jpeg'},
+  {c:'hachapuri', ru:'По-мегрельски',    p:450, w:'450 г', img:'photo/hachapuri-megrelski.jpeg'},
+  {c:'hachapuri', ru:'С сыром и зеленью', p:430, w:'420 г', img:'photo/hachapuri-syr-zelen.jpeg'},
 
-  {c:'snack', ru:'Картофель фри', p:150, w:'150 г'},
-  {c:'snack', ru:'Картофель по-деревенски', p:170, w:'180 г'},
-  {c:'snack', ru:'Наггетсы, 6 шт', p:190, w:'160 г'},
-  {c:'snack', ru:'Луковые кольца', p:{genina:180}, w:'150 г'},
+  /* ── Бургеры ─────────────────────────────────────────── */
+  {c:'burger', ru:'Классик из телятины', p:450, w:'320 г', img:'photo/burger-klassik-telyatina.png',
+   d:'Мраморная телятина, маринованные огурцы, салат айсберг, томат, лучок, авторский соус'},
+  {c:'burger', ru:'Классик из цыплёнка', p:410, w:'310 г', img:'photo/burger-klassik-tsyplenok.png',
+   d:'Филе цыплёнка, томат, салатный лист, свежий огурец, 2 фирменных сыра'},
+  {c:'burger', ru:'Бургер от шефа', p:480, w:'340 г', img:'photo/burger-ot-shefa.png',
+   d:'Мраморная телятина, куриное филе, халапеньо, маринованные огурцы, салат айсберг, томат, лучок, авторский соус'},
+  {c:'burger', ru:'Блэк бургер', p:460, w:'320 г', img:'photo/burger-blek.png',
+   d:'Мраморная телятина, халапеньо, лучок, острая аджика, салат айсберг, чеддер, томат, соус 1000 островов'},
+  {c:'burger', ru:'Бургер 3 сыра', p:460, w:'320 г', img:'photo/burger-3-syra.png',
+   d:'Мраморная телятина, моцарелла, пармезан, чеддер, томат, салатный лист, авторский соус'},
+  {c:'burger', ru:'Двойная телятина', p:590, w:'420 г', img:'photo/burger-dvoynaya-telyatina.png',
+   d:'Двойная мраморная телятина, салат айсберг, томат, огурчики, лучок, чеддер, авторский соус'},
+  {c:'burger', ru:'Королевский стейк', p:679, w:'330 г', img:'photo/burger-korolevskiy-steyk.png',
+   d:'Вырезка из мраморной телятины, айсберг, халапеньо, чеддер, моцарелла, томат, огурчики, лучок, 2 фирменных соуса'},
+  {c:'burger', ru:'Королевская креветка', p:679, w:'320 г', img:'photo/burger-korolevskaya-krevetka.png',
+   d:'Креветки в кляре, салатный лист, томат, огурчики, двойной чеддер, 2 фирменных соуса'},
+  {c:'burger', ru:'Двойной блэк', p:590, w:'420 г', img:'photo/burger-dvoynoy-blek.png',
+   d:'Двойная мраморная телятина, халапеньо, острая аджика, салат айсберг, чеддер, томат, лучок, соус 1000 островов'},
 
-  {c:'sauce', ru:'Соус чесночный', p:40, w:'50 г'},
-  {c:'sauce', ru:'Соус сырный', p:50, w:'50 г'},
-  {c:'sauce', ru:'Соус барбекю', p:40, w:'50 г'},
-  {c:'sauce', ru:'Соус острый', p:40, w:'50 г', hot:true},
+  /* ── Закуски ─────────────────────────────────────────── */
+  {c:'snack', ru:'Наггетсы',             p:249, w:'150 г'},
+  {c:'snack', ru:'Сырные палочки',       p:240, w:'5 шт'},
+  {c:'snack', ru:'Фри стандарт',         p:180, w:'150 г'},
+  {c:'snack', ru:'Крылышки',             p:290, w:'4 шт'},
+  {c:'snack', ru:'Луковые кольца',       p:150, w:'6 шт'},
+  {c:'snack', ru:'Картофельные дольки',  p:210, w:'150 г'},
+  {c:'snack', ru:'Соусы в ассортименте', p:80},
 
-  {c:'drink', ru:'Кола 0,5 л', p:120},
-  {c:'drink', ru:'Морс домашний 0,4 л', p:130},
-  {c:'drink', ru:'Айран 0,3 л', p:110},
-  {c:'drink', ru:'Чай', p:90},
-  {c:'drink', ru:'Кофе американо', p:{'8marta':140}}
+  /* ── Супы — только 8 Марта ───────────────────────────── */
+  {c:'soup', ru:'Куриный', p:309, img:'photo/sup-kurinyy.jpeg',
+   d:'Куриное филе, картофель, вермишель, морковь, лук, укроп'},
+  {c:'soup', ru:'Кюфта с говядиной', p:399, img:'photo/sup-kyufta.jpeg',
+   d:'Кюфта из говядины с рисом, картофель, перец болгарский, помидор, лук, кинза'},
+  {c:'soup', ru:'Чечевичный', p:249, img:'photo/sup-chechevichnyy.jpeg',
+   d:'Чечевица, картофель, морковь, сливочное масло, лимон'},
+
+  /* ── Паста — только 8 Марта ──────────────────────────── */
+  {c:'pasta', ru:'С курицей', p:399, img:'photo/pasta-kuritsa.jpeg',
+   d:'Фетучини, куриное филе, грибы, сливки, базилик, пармезан'},
+  {c:'pasta', ru:'С креветками', p:459, img:'photo/pasta-krevetki.jpeg',
+   d:'Фетучини, креветки очищенные, сливки, пармезан'},
+  {c:'pasta', ru:'Болоньезе', p:439, img:'photo/pasta-bolognese.jpeg',
+   d:'Фетучини, томатный соус, фарш из телятины, пармезан'},
+
+  /* ── Салаты — только 8 Марта ─────────────────────────── */
+  {c:'salad', ru:'Цезарь', p:349, img:'photo/salat-cezar.jpeg',
+   d:'Салат айсберг, куриное филе, помидоры, гренки, соус, пармезан'},
+  {c:'salad', ru:'Греческий', p:349, img:'photo/salat-grecheskiy.jpeg',
+   d:'Салатный лист, маслины, огурцы, помидоры, болгарский перец, красный лук, оливковое масло'},
+  {c:'salad', ru:'Оливье', p:329, w:'150 г', img:'photo/salat-olivye.jpeg',
+   d:'Говядина, картофель, морковь, яйцо, зелёный горошек, маринованные огурцы, красный лук, укроп'},
+
+  /* ── Шашлык — только 8 Марта ─────────────────────────── */
+  {c:'grill', ru:'Бастурма из говядины',  p:690, w:'250–280 г', img:'photo/basturma.jpeg'},
+  {c:'grill', ru:'Баранина на рёбрышках', p:690, w:'250–280 г', img:'photo/baranina-rebryshki.jpeg'},
+  {c:'grill', ru:'Рулет от шефа',         p:790, w:'250–280 г', img:'photo/rulet-ot-shefa.jpeg'},
+  {c:'grill', ru:'Люля-кебаб из говядины', p:590, w:'210–230 г', img:'photo/lyulya-kebab.jpeg'},
+  {c:'grill', ru:'Филе цыплёнка',         p:450, w:'250–270 г', img:'photo/file-tsyplenka.jpeg'},
+  {c:'grill', ru:'Сёмга на углях',        p:990, w:'250–280 г', img:'photo/semga.jpeg'},
+  {c:'grill', ru:'Ассорти из 5 шашлыков', p:2990, w:'1000–1100 г', img:'photo/assorti-5-shashlykov.jpeg',
+   d:'Баранина, говядина, филе цыплёнка, рулет, люля-кебаб'},
+  {c:'grill', ru:'Мега ассорти', p:4899, img:'photo/mega-assorti.jpeg',
+   d:'Овощной гриль, мясной гриль, лепёшка 2 шт, фирменный соус 2 шт'},
+  {c:'grill', ru:'Чесночный соус к шашлыку', p:80},
+  {c:'grill', ru:'Томатный соус к шашлыку',  p:80},
+  {c:'grill', ru:'Лепёшка',                  p:50},
+
+  /* ── Овощи на углях — только 8 Марта ─────────────────── */
+  {c:'veg', ru:'Картофель на углях', p:200, w:'140–170 г', img:'photo/kartofel-uglyah.jpeg'},
+  {c:'veg', ru:'Помидоры на углях',  p:210, w:'150–190 г', img:'photo/pomidory-uglyah.jpeg'},
+  {c:'veg', ru:'Кабачки на углях',   p:210, w:'110–130 г', img:'photo/kabachki-uglyah.jpeg'},
+  {c:'veg', ru:'Шампиньоны',         p:220, w:'100–130 г', img:'photo/shampinony.jpeg'},
+  {c:'veg', ru:'Баклажаны на углях', p:220, w:'130–150 г', img:'photo/baklazhany-uglyah.jpeg'},
+  {c:'veg', ru:'Перец на углях',     p:220, w:'150–170 г', img:'photo/perets-uglyah.jpeg'},
+  {c:'veg', ru:'Овощное ассорти',    p:990, w:'530–580 г', img:'photo/ovoshchnoe-assorti.jpeg'},
+
+  /* ── Кофе ────────────────────────────────────────────── */
+  {c:'coffee', ru:'Латте',      v:VC, p:[239,279], img:'photo/kofe-latte.png'},
+  {c:'coffee', ru:'Капучино',   v:VC, p:[229,269], img:'photo/kofe-kapuchino.png'},
+  {c:'coffee', ru:'Американо',  v:VC, p:[189,229], img:'photo/kofe-americano.png'},
+  {c:'coffee', ru:'Флэт-уайт',  v:VC, p:[239,289], img:'photo/kofe-flet-uayt.jpeg'},
+  {c:'coffee', ru:'Раф',        v:VC, p:[249,299], img:'photo/kofe-raf.jpeg'},
+  {c:'coffee', ru:'Какао',      v:VC, p:[179,209], img:'photo/kakao.jpeg'},
+  {c:'coffee', ru:'Чай',        v:VC, p:[60,80],   img:'photo/chay.jpeg'},
+  {c:'coffee', ru:'Эспрессо',   v:['25 мл','50 мл'], p:[139,189], img:'photo/kofe-espresso.jpeg'},
+
+  /* ── Чай в чайнике, 1 л ──────────────────────────────── */
+  {c:'teapot', ru:'Чёрный чай',      p:550, w:'1 л'},
+  {c:'teapot', ru:'Зелёный чай',     p:550, w:'1 л'},
+  {c:'teapot', ru:'Облепиховый чай', p:650, w:'1 л'},
+  {c:'teapot', ru:'Ягодный чай',     p:650, w:'1 л'},
+  {c:'teapot', ru:'Добавка лимон',   p:20},
+
+  /* ── Напитки ─────────────────────────────────────────── */
+  {c:'drink', ru:'Морс',      p:150},
+  {c:'drink', ru:'Айран',     p:150},
+  {c:'drink', ru:'Вода',      p:130},
+  {c:'drink', ru:'Лимонад',   p:180},
+  {c:'drink', ru:'Энергетик', p:200}
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -893,19 +1071,66 @@ const esc = s => String(s).replace(/[&<>"']/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rub = n => n.toLocaleString('ru-RU') + ' ₽';
 
-/* Название позиции служит ключом корзины, дубли ломают счёт. */
-(() => {
-  const seen = new Set(), dupes = [];
-  MENU.forEach(i => (seen.has(i.ru) ? dupes.push(i.ru) : seen.add(i.ru)));
-  if (dupes.length) console.error('Дубли названий в MENU:', dupes);
+/* Одно название встречается в разных категориях: «4 сыра» есть и в
+   шаурме, и в пицце. В корзине и в заказе на кухню такие позиции
+   обязаны различаться, поэтому к повторяющимся именам добавляем
+   категорию. Список считается один раз при загрузке. */
+const DUP = (() => {
+  const seen = new Set(), dup = new Set();
+  MENU.forEach(i => (seen.has(i.ru) ? dup.add(i.ru) : seen.add(i.ru)));
+  return dup;
 })();
 
-function priceOf(item, cafeId){
-  return typeof item.p === 'number' ? item.p : item.p && item.p[cafeId];
-}
-const itemsOf = cafeId => MENU.filter(i => priceOf(i, cafeId) != null);
-const findItem = name => MENU.find(i => i.ru === name);
+const catOf = id => CATS.find(c => c.id === id);
 const cafeById = id => CAFES.find(c => c.id === id);
+
+/* Цена позиции. У вариантов (шаурма, пицца, кофе) p — массив в том же
+   порядке, что и подписи в v; vi — какой вариант. */
+function priceOf(item, vi){
+  return Array.isArray(item.p) ? item.p[vi || 0] : item.p;
+}
+
+/* Где позиция продаётся. Правило задаётся категорией: супы, паста,
+   салаты, шашлык и овощи на углях есть только на 8 Марта. Отдельной
+   позиции можно поставить своё only, оно перебивает категорию. */
+function availableAt(item, cafeId){
+  const only = item.only || (catOf(item.c) || {}).only;
+  return !only || only === cafeId;
+}
+const itemsOf = cafeId => MENU.filter(i => availableAt(i, cafeId));
+
+/* Ключ в корзине. Включает вариант, иначе «Латте» в двух объёмах слился
+   бы в одну строку, и категорию — если название неуникально. */
+function keyOf(item, vi){
+  const base = DUP.has(item.ru)
+    ? `${(catOf(item.c) || {}).name} «${item.ru}»`
+    : item.ru;
+  return item.v ? `${base} · ${item.v[vi]}` : base;
+}
+
+/* Ключи обязаны быть уникальны — на них держится счёт корзины. */
+(() => {
+  const seen = new Set(), dupes = [];
+  MENU.forEach(i => (i.v || [0]).forEach((_, vi) => {
+    const k = keyOf(i, vi);
+    seen.has(k) ? dupes.push(k) : seen.add(k);
+  }));
+  if (dupes.length) console.error('Дубли ключей в MENU:', dupes);
+})();
+
+/* Обратный разбор ключа: возвращает {item, vi} или null, если позиции
+   больше нет в меню (меню правили, а корзина у гостя осталась). */
+function findKey(key){
+  for (const item of MENU){
+    if (item.v){
+      const vi = item.v.findIndex((_, i) => keyOf(item, i) === key);
+      if (vi >= 0) return {item, vi};
+    } else if (item.ru === key){
+      return {item, vi:0};
+    }
+  }
+  return null;
+}
 
 function plural(n, one, few, many){
   const a = Math.abs(n) % 100, b = a % 10;
@@ -969,8 +1194,18 @@ const fromQR = cafeById(new URLSearchParams(location.search).get('cafe')) != nul
 let cat = 'all';
 
 const cartQty = () => Object.values(cart).reduce((a, b) => a + b, 0);
-const cartSum = () => Object.entries(cart).reduce((sum, [name, qty]) => {
-  const it = findItem(name), p = it && priceOf(it, cafe);
+
+/* Доставка платная и входит в итог. Считаем её отдельно от товаров,
+   чтобы гость видел, из чего сложилась сумма. */
+const isDelivery = () => {
+  const r = $('input[name="way"]:checked');
+  return !!r && r.value === 'delivery';
+};
+const deliveryFee = () => (isDelivery() && cartQty() ? DELIVERY : 0);
+const orderTotal = () => cartSum() + deliveryFee();
+const cartSum = () => Object.entries(cart).reduce((sum, [key, qty]) => {
+  const f = findKey(key);
+  const p = f && availableAt(f.item, cafe) ? priceOf(f.item, f.vi) : 0;
   return sum + (p ? p * qty : 0);
 }, 0);
 
@@ -1047,9 +1282,9 @@ function renderCafes(){
    нет, выбрасывать молча нельзя — показываем список и спрашиваем. */
 function pickCafe(id){
   if (id === cafe || !cafeById(id)) return;
-  const lost = Object.keys(cart).filter(n => {
-    const it = findItem(n);
-    return !it || priceOf(it, id) == null;
+  const lost = Object.keys(cart).filter(k => {
+    const f = findKey(k);
+    return !f || !availableAt(f.item, id);
   });
 
   if (!lost.length) return applyCafe(id);
@@ -1090,22 +1325,52 @@ function renderChips(){
 
 /* Кадр показываем только у позиций с img: вперемешку с фото
    и без выглядит неряшливо, поэтому фото добавляются категорией. */
+const rub0 = n => n.toLocaleString('ru-RU');
+
+/* Строка меню. У позиции без вариантов цена и счётчик стоят справа
+   от названия. У позиции с вариантами (курица/говядина, 300/500 г,
+   230/330 мл) они уходят под описание отдельными строками — иначе
+   на телефоне четыре цифры и два счётчика в один ряд не помещаются. */
 function row(item){
-  const price = priceOf(item, cafe);
-  const qty = cart[item.ru] || 0;
   const meta = [];
   if (item.w) meta.push(`<span class="num">${esc(item.w)}</span>`);
   if (item.hot) meta.push('<span class="hot">Остро</span>');
+  const inCart = (item.v || [0]).some((_, i) => cart[keyOf(item, i)]);
+
+  const head = `
+    ${item.img ? `<img class="row-shot" src="${esc(item.img)}" alt="" loading="lazy" width="70" height="70">` : '<span></span>'}
+    <div class="row-body">
+      <h3 class="row-name">${esc(item.ru)}</h3>
+      ${meta.length ? `<p class="row-meta">${meta.join('')}</p>` : ''}
+      ${item.d ? `<p class="row-desc">${esc(item.d)}</p>` : ''}
+    </div>`;
+
+  if (!item.v){
+    const key = keyOf(item, 0);
+    return `
+      <li class="row" ${inCart ? 'data-in' : ''}>
+        ${head}
+        <div class="row-buy">
+          <p class="row-price num">${rub0(priceOf(item, 0))}<i>₽</i></p>
+          ${stepper(key, cart[key] || 0, 'Добавить: ' + item.ru)}
+        </div>
+      </li>`;
+  }
+
+  const lines = item.v.map((label, i) => {
+    const key = keyOf(item, i);
+    return `
+      <div class="opt">
+        <span class="opt-name">${esc(label)}</span>
+        <span class="row-price num">${rub0(priceOf(item, i))}<i>₽</i></span>
+        ${stepper(key, cart[key] || 0, `Добавить: ${item.ru}, ${label}`)}
+      </div>`;
+  }).join('');
+
   return `
-    <li class="row" ${qty ? 'data-in' : ''}>
-      ${item.img ? `<img class="row-shot" src="${esc(item.img)}" alt="" loading="lazy" width="70" height="70">` : '<span></span>'}
-      <div class="row-body">
-        <h3 class="row-name">${esc(item.ru)}</h3>
-        ${meta.length ? `<p class="row-meta">${meta.join('')}</p>` : ''}
-        ${item.d ? `<p class="row-desc">${esc(item.d)}</p>` : ''}
-      </div>
-      <p class="row-price num">${price.toLocaleString('ru-RU')}<i>₽</i></p>
-      ${stepper(item.ru, qty, 'Добавить: ' + item.ru)}
+    <li class="row row-multi" ${inCart ? 'data-in' : ''}>
+      ${head}
+      <div class="opts">${lines}</div>
     </li>`;
 }
 
@@ -1154,8 +1419,13 @@ function renderCart(){
   $('#openCart').toggleAttribute('data-empty', qty === 0);
   $('#dock').toggleAttribute('data-on', qty > 0);
   $('#dockCount').textContent = qty + ' ' + plural(qty, 'позиция', 'позиции', 'позиций');
-  $('#dockSum').textContent = rub(sum);
-  $('#total').textContent = rub(sum);
+  const fee = deliveryFee();
+  $('#dockSum').textContent = rub(sum);          /* в доке — только товары */
+  $('#total').textContent = rub(sum + fee);
+  $('#sumGoods').textContent = rub(sum);
+  $('#sumDeliveryVal').textContent = rub(DELIVERY);
+  $('#sumItems').hidden = !fee;                  /* без доставки разбивка лишняя */
+  $('#sumDelivery').hidden = !fee;
 
   $('#cartEmpty').hidden = qty > 0;
   $('#lines').hidden = qty === 0;
@@ -1163,13 +1433,14 @@ function renderCart(){
   $('#cartFoot').hidden = qty === 0;
 
   $('#lines').innerHTML = entries.map(([name, n], i) => {
-    const it = findItem(name), price = it && priceOf(it, cafe);
+    const f = findKey(name);
+    const price = f && availableAt(f.item, cafe) ? priceOf(f.item, f.vi) : 0;
     if (!price) return '';
     return `
       <li class="line" style="--i:${i}">
         <div class="line-info">
           <p class="line-name">${esc(name)}</p>
-          <p class="line-unit num">${price.toLocaleString('ru-RU')} ₽ × ${n}</p>
+          <p class="line-unit num">${rub0(price)} ₽ × ${n}</p>
         </div>
         ${stepper(name, n, 'Добавить ещё одну порцию: ' + name)}
         <p class="line-sum num">${rub(price * n)}</p>
@@ -1206,23 +1477,35 @@ function buildText(num){
     when = (target < now ? 'завтра к ' : 'сегодня к ') + time;
   }
 
-  const lines = Object.entries(cart).map(([name, n]) => {
-    const price = priceOf(findItem(name), cafe);
-    return `${n} × ${name} — ${(price * n).toLocaleString('ru-RU')} ₽`;
+  /* Заказ собираем по разделам меню. Без раздела строка «1 × С курицей»
+     на кухне двусмысленна — это паста или шаурма, а «1 × Куриный» суп
+     это или что-то ещё. Заголовок снимает вопрос. */
+  const lines = CATS.flatMap(c => {
+    const rows = Object.entries(cart)
+      .map(([key, n]) => ({n, f: findKey(key)}))
+      .filter(x => x.f && x.f.item.c === c.id)
+      .map(({n, f}) => {
+        const label = f.item.v
+          ? `${f.item.ru}, ${f.item.v[f.vi].toLowerCase()}`
+          : f.item.ru;
+        return `• ${n} × ${label} — ${rub0(priceOf(f.item, f.vi) * n)} ₽`;
+      });
+    return rows.length ? [`${c.name}:`, ...rows] : [];
   });
 
   return [
     num ? `Заказ №${num} с сайта «Добрый кебаб»` : 'Заказ с сайта «Добрый кебаб»',
     '',
     `Кафе: ${c.name}, ${c.addr}`,
-    `Способ: ${way === 'delivery' ? 'Доставка (такси за счёт гостя)' : 'Самовывоз'}`,
+    `Способ: ${way === 'delivery' ? 'Доставка' : 'Самовывоз'}`,
     way === 'delivery' ? `Адрес: ${$('#addr').value.trim()}` : null,
     `Когда: ${when}`,
     '',
     'Заказ:',
     ...lines,
     '',
-    `Итого: ${cartSum().toLocaleString('ru-RU')} ₽`,
+    ...(deliveryFee() ? [`Доставка: ${rub0(DELIVERY)} ₽`] : []),
+    `Итого: ${rub0(orderTotal())} ₽`,
     '',
     `Имя: ${$('#name').value.trim()}`,
     `Телефон: ${$('#phone').value.trim()}`,
@@ -1293,10 +1576,11 @@ $('#openCart').addEventListener('click', openCart);
 $('#dockBtn').addEventListener('click', openCart);
 
 $$('input[name="way"]').forEach(r => r.addEventListener('change', () => {
-  const delivery = $('input[name="way"]:checked').value === 'delivery';
+  const delivery = isDelivery();
   $('#fAddr').hidden = !delivery;
   $('#taxiHint').hidden = !delivery;
   if (!delivery) fieldOf($('#addr')).classList.remove('invalid');
+  renderCart();                    /* доставка меняет итог */
 }));
 
 /* Номер берём из общей таблицы — она одна на всех гостей, поэтому
@@ -1320,7 +1604,7 @@ async function takeNumber(){
       phone: $('#phone').value.trim(),
       addr: $('#fAddr').hidden ? '' : $('#addr').value.trim(),
       time: $('#time').value || '',
-      sum: String(cartSum()),
+      sum: String(orderTotal()),
       items: Object.entries(cart).map(([n, q]) => `${q}×${n}`).join(', ')
     });
     const res = await fetch(ORDER_NUMBER_URL + '?' + q, {signal: ctl.signal});
@@ -1394,9 +1678,9 @@ store.set(KEY_CAFE, cafe);
    Молча оставить нельзя — счётчик показывал бы позиции, а сумма ноль,
    и такой же заказ ушёл бы в WhatsApp. */
 (() => {
-  const stale = Object.keys(cart).filter(n => {
-    const it = findItem(n);
-    return !it || priceOf(it, cafe) == null;
+  const stale = Object.keys(cart).filter(k => {
+    const f = findKey(k);
+    return !f || !availableAt(f.item, cafe);
   });
   if (!stale.length) return;
   stale.forEach(n => delete cart[n]);
