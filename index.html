@@ -108,9 +108,12 @@
 
   ── ЧТО ЕЩЁ НЕ РЕШЕНО ─────────────────────────────────────────────
   Меню, цены, состав и вес — настоящие, с печатного меню заказчика.
-  Адреса, районы, часы и рейтинги — с карточек 2ГИС:
-    де Геннина, 34   Академический р-н, 620105, ежедневно 11:00–01:00
-    8 Марта, 12      Ленинский р-н, 620014, круглосуточно
+  Адреса, районы и рейтинги — с карточек 2ГИС, часы — от заказчика
+  (01.09.2026), они расходятся с 2ГИС и главнее его:
+    де Геннина, 34   Академический р-н, 620105, 08:00–03:00
+    8 Марта, 12      Ленинский р-н, 620014,     12:00–05:00
+  Доставку принимают в своё окно: де Геннина 13:00–03:00,
+  8 Марта 12:00–05:00. Круглосуточной работы больше нет.
   Рейтинг 4.7: 151 оценка на де Геннина, 193 на 8 Марта.
 
   Ждём от заказчика: домен; подтверждение часов на де Геннина (2ГИС
@@ -130,13 +133,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Добрый кебаб — шаурма, бургеры и пицца в Екатеринбурге</title>
-<meta name="description" content="«Добрый кебаб» — два кафе в Екатеринбурге: де Геннина, 34 и 8 Марта, 12. На 8 Марта круглосуточно. Соберите заказ и отправьте одной кнопкой в WhatsApp.">
+<meta name="description" content="«Добрый кебаб» — два кафе в Екатеринбурге: де Геннина, 34 и 8 Марта, 12. На 8 Марта до 5 утра. Соберите заказ и отправьте одной кнопкой в WhatsApp.">
 <meta name="theme-color" content="#0A0A0A">
 <!-- Пока меню — заглушка, а домен не выбран, странице нечего делать
      в поиске. Убрать, когда приедут цены и сайт встанет на домен. -->
 <meta name="robots" content="noindex, nofollow">
 <meta property="og:title" content="Добрый кебаб — Екатеринбург">
-<meta property="og:description" content="Два кафе: де Геннина, 34 и 8 Марта, 12. Круглосуточно на 8 Марта. Заказ уходит в WhatsApp одной кнопкой.">
+<meta property="og:description" content="Два кафе: де Геннина, 34 и 8 Марта, 12. До 5 утра на 8 Марта. Заказ уходит в WhatsApp одной кнопкой.">
 <meta property="og:type" content="restaurant.restaurant">
 <meta property="og:locale" content="ru_RU">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230A0A0A'/%3E%3Cpath d='M50 14C62 37 78 51 78 66a28 28 0 0 1-56 0c0-15 16-29 28-52z' fill='%23E8523A'/%3E%3Cpath d='M52 44c8 14 14 18 14 26a16 16 0 0 1-32 0c0-8 10-14 18-26z' fill='%230A0A0A'/%3E%3C/svg%3E">
@@ -328,31 +331,43 @@ p,li{text-wrap:pretty}
 
 .hero-cta{display:flex;flex-wrap:wrap;gap:10px}
 
-/* Снимок подключается переменной, а не прямой ссылкой: пока файла нет,
+/* Красного поля вокруг логотипа больше нет (заказчик, 01.09.2026):
+   знак стоит прямо на чёрном фоне страницы. Своя чёрная подложка
+   у файла логотипа при этом сливается с фоном — рамок не остаётся
+   вовсе, видно только сам знак.
+   Снимок подключается переменной, а не прямой ссылкой: пока файла нет,
    браузер не уходит за ним и не ловит 404 на каждой загрузке.
    Появится фото — раскомментируйте строку --hero-shot ниже. */
 .hero-panel{
   position:relative;min-height:min(58vh,460px);
   /* --hero-shot:url('photo/hero.jpg'); */
-  background:var(--red-field) var(--hero-shot,none) center/cover no-repeat;
-  display:grid;place-items:stretch;padding:clamp(16px,2.2vw,30px);
+  background:var(--hero-shot,none) center/cover no-repeat;
+  display:grid;place-items:stretch;
 }
 /* Когда снимок встанет, знак поверх него мешает — прячем. */
 .hero-panel[style*="--hero-shot"] .logo-plate,
 .hero-panel.has-shot .logo-plate{display:none}
-/* Плашка занимает поле целиком, красное остаётся ровной рамкой по
-   padding. В самом файле логотипа вокруг знака свои чёрные поля —
-   подрезаем их, увеличивая картинку и обрезая по плашке, иначе
-   надпись тонет в трёх вложенных рамках. */
-/* Плашка держит квадрат по высоте поля: логотип квадратный, и на
+/* Плашка занимает поле целиком. В самом файле логотипа вокруг знака
+   свои чёрные поля — подрезаем их, увеличивая картинку и обрезая по
+   плашке, иначе знак выходит мелким посреди пустоты.
+   Плашка держит квадрат по высоте поля: логотип квадратный, и на
    широком низком поле (одна колонка) он иначе обрезался по вертикали —
-   у шестиугольника срезало верх и низ. */
-.logo-plate{position:relative;height:100%;aspect-ratio:1;margin-inline:auto;
-  background:#000;overflow:hidden}
+   у шестиугольника срезало верх и низ. max-width страхует обратный
+   случай: узкая колонка и высокое поле, когда квадрат по высоте
+   не умещается по ширине. */
+.logo-plate{position:relative;height:100%;max-width:100%;aspect-ratio:1;margin-inline:auto;
+  overflow:hidden}
 /* Картинку выводим из потока: иначе увеличенная до 118% она сама
    растягивала плашку по высоте, и первый экран рос вслед за ней. */
 .logo-plate .logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:118%;max-width:none;height:auto}
+  width:118%;max-width:none;height:auto;
+  /* Чёрный в файле логотипа — чистый #000, фон страницы — #0A0A0A.
+     Без этой строки на месте знака виден чуть более тёмный квадрат:
+     разница крошечная, но на хорошем экране в тёмной комнате читается
+     как рамка — ровно то, что просили убрать. Режим screen оставляет
+     чёрный пикселю фона нетронутым, а цвета знака поднимает на те же
+     четыре единицы из 255, чего глаз не различает. */
+  mix-blend-mode:screen}
 
 /* ── кнопки ──────────────────────────────────────────────── */
 .btn{
@@ -400,8 +415,25 @@ p,li{text-wrap:pretty}
    слева появляется у тех позиций, у которых прописан img. */
 .menu-bar{position:sticky;top:var(--head);z-index:60;background:var(--ink);
   border-block:1px solid var(--hair);margin-bottom:clamp(20px,2.4vw,34px)}
-.chips{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.chips{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;
+  scroll-behavior:smooth}
 .chips::-webkit-scrollbar{display:none}
+/* Разделов четырнадцать, лента вшестеро шире телефона, полосы прокрутки
+   нет — и «Напитки» в конце просто не находят: заказчик сообщил, что
+   вкладки нет вовсе. Стрелка у края показывает, что лента продолжается,
+   и листает её одним касанием. Появляется только там, куда есть куда
+   двигаться, поэтому на широком экране её не видно. */
+.chips-wrap{position:relative}
+.chips-arr{position:absolute;top:0;bottom:0;width:46px;display:none;
+  align-items:center;justify-content:center;padding:0;border:0;cursor:pointer;
+  color:var(--paper);background:linear-gradient(270deg,var(--ink) 58%,transparent)}
+.chips-arr:not([hidden]){display:flex}
+.chips-arr[data-dir="-1"]{left:0;background:linear-gradient(90deg,var(--ink) 58%,transparent)}
+.chips-arr[data-dir="1"]{right:0}
+.chips-arr .ico{width:20px;height:20px;fill:none;stroke:currentColor}
+.chips-arr[data-dir="-1"] .ico{transform:rotate(180deg)}
+.chips-arr:hover{color:var(--gold)}
+.chips-arr:focus-visible{outline:3px solid var(--gold-hi);outline-offset:-3px}
 .chip{
   flex:0 0 auto;min-height:52px;padding:14px 18px;background:transparent;
   border:0;border-bottom:3px solid transparent;color:var(--paper-dim);
@@ -524,6 +556,17 @@ dialog::backdrop{background:var(--scrim)}
 .line .step button,.line .step .qty{height:34px;width:34px;min-width:34px}
 .line .step .qty{min-width:38px}
 .line .step .ico{width:15px;height:15px}
+/* На телефоне счётчик (122px) и сумма (74px) съедали строку: на 320px
+   названию оставалось 56px, оно вставало башней в четыре строки,
+   а «По-мегрельски» вылезало за край. Ниже 430px — а это ширина
+   любого телефона вплоть до Pro Max — название занимает строку
+   целиком, счётчик и сумма уходят под него. На планшете и компьютере
+   лист шириной 560px, там места хватает и строка остаётся одной. */
+@media (max-width:430px){
+  .line{grid-template-columns:1fr auto;gap:9px 12px}
+  .line-info{grid-column:1/-1}
+  .line .step{justify-self:start}
+}
 
 .cart-empty{padding:50px 0;color:var(--paper-dim)}
 .cart-empty .ico{width:46px;height:46px;fill:var(--ink-4);margin-bottom:14px}
@@ -550,7 +593,7 @@ dialog::backdrop{background:var(--scrim)}
 #send[data-busy]{background:var(--green);opacity:.7;cursor:progress}
 
 /* ── форма ───────────────────────────────────────────────── */
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:14px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:14px}
 .seg label{position:relative;display:flex;align-items:center;justify-content:center;
   min-height:46px;padding:11px 12px;text-align:center;cursor:pointer;
   background:transparent;border:1px solid var(--edge);
@@ -561,6 +604,31 @@ dialog::backdrop{background:var(--scrim)}
 .seg label:hover{border-color:var(--gold)}
 .seg label:has(input:checked){background:var(--gold);border-color:var(--gold);color:var(--ink)}
 .seg label:has(input:focus-visible){outline:3px solid var(--gold-hi);outline-offset:2px}
+/* Способ, которым сейчас не заказать. Золотую заливку снимаем даже
+   с выбранного: золото на этом переключателе значит «так и будет»,
+   а раз не будет — оно врёт. Заодно светлый текст на золоте давал
+   1.2:1 и не читался вовсе. Гасим цветом, а не прозрачностью:
+   подпись «с 13:00» — сведения, и читаться она обязана.
+   Замерено на фоне листа #121212: подпись 6.8:1, час открытия 5.1:1. */
+.seg label:has(input:disabled){background:transparent;color:var(--paper-dim);
+  border-color:var(--hair-2);cursor:not-allowed}
+.seg label:has(input:disabled) small{opacity:1;color:var(--red)}
+/* Способов стало три, и в ряд они помещаются не везде: «САМОВЫВОЗ»
+   в трети от 320px не встаёт. На телефоне переключатель складывается
+   в столбик — заодно видно подписи «ко времени» и «+600 ₽». */
+@media (max-width:430px){
+  .seg{grid-template-columns:1fr}
+  .seg label + label{border-left:1px solid var(--edge);border-top:0}
+}
+
+/* Кофе не доставляем, но в меню он всегда живой: переключатель
+   способа спрятан в корзине, и если гость оставил там «Доставку»,
+   погасшее меню выглядит поломкой — причина-то на другом экране.
+   Правило срабатывает там, где выбирают доставку, и в корзине. */
+.warn{display:flex;gap:9px;align-items:flex-start;margin:0 0 4px;
+  padding:11px 13px;border:1px solid var(--red);font-size:13.5px;color:var(--paper)}
+.warn .ico{width:17px;height:17px;fill:var(--red);flex:0 0 auto;margin-top:2px}
+.warn b{color:var(--gold);font-weight:600}
 
 .rows{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .rows .wide{grid-column:1/-1}
@@ -643,7 +711,7 @@ dialog::backdrop{background:var(--scrim)}
   золото на деньгах и текущем выборе, зелёный на «открыто» и WhatsApp. Жёсткие
   края (радиус 3px), тени со смещением, ни одного градиента и
   надзаголовка. Unbounded на дисплее, Golos Text в тексте.
-  STORY: Гость дома вечером понимает, что тут круглосуточно и 4.7
+  STORY: Гость дома вечером понимает, что тут кормят до 5 утра и 4.7
   из 344 оценок, собирает заказ и отправляет его одной кнопкой.
   FIRST VIEWPORT: Слева заголовок до 96px, два проверяемых факта
   линейкой, красная кнопка «Собрать заказ». Справа красное поле со
@@ -665,6 +733,7 @@ dialog::backdrop{background:var(--scrim)}
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 11v5.4M12 7.6v.9" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h13l-3.4-3.4M20 16H7l3.4 3.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 
@@ -700,7 +769,7 @@ dialog::backdrop{background:var(--scrim)}
              стояло «Два кафе» — это не довод, он и так звучит в
              подводке, а строку фактов ломал переносом. -->
         <ul class="proof">
-          <li><b class="on">Круглосуточно</b><span>на 8 Марта, 12</span></li>
+          <li><b class="on">До 5 утра</b><span>на 8 Марта, 12</span></li>
           <li><b>4.7</b><span>344 оценки в 2ГИС</span></li>
         </ul>
 
@@ -709,13 +778,13 @@ dialog::backdrop{background:var(--scrim)}
             <svg class="ico" aria-hidden="true"><use href="#i-cart"/></svg>
             Собрать заказ
           </a>
-          <a class="btn btn-line" href="tel:+79644881155">Позвонить</a>
+          <a class="btn btn-line" href="tel:+79221114090">Позвонить</a>
         </div>
       </div>
 
-      <!-- Настоящий логотип заказчика. Он нарисован на чёрном, поэтому
-           стоит чёрной плашкой внутри красного поля: подложка знака
-           становится частью композиции, а не браком.
+      <!-- Настоящий логотип заказчика. Он нарисован на чёрном и стоит
+           прямо на чёрном фоне страницы: подложка знака сливается с
+           фоном, и рамки вокруг не видно.
            Появится photo/hero.jpg — займёт место логотипа. -->
       <div class="hero-panel">
         <div class="logo-plate">
@@ -751,8 +820,16 @@ dialog::backdrop{background:var(--scrim)}
     </div>
 
     <div class="menu-bar">
-      <div class="wrap">
+      <div class="wrap chips-wrap">
+        <button class="chips-arr" type="button" id="chipsPrev" data-dir="-1"
+                aria-label="Показать предыдущие разделы" hidden>
+          <svg class="ico" aria-hidden="true"><use href="#i-chev"/></svg>
+        </button>
         <div class="chips" id="chips" role="group" aria-label="Категории меню"></div>
+        <button class="chips-arr" type="button" id="chipsNext" data-dir="1"
+                aria-label="Показать следующие разделы" hidden>
+          <svg class="ico" aria-hidden="true"><use href="#i-chev"/></svg>
+        </button>
       </div>
     </div>
 
@@ -768,7 +845,7 @@ dialog::backdrop{background:var(--scrim)}
       <div class="cafes" id="contactCards"></div>
       <p class="note">
         <svg class="ico" aria-hidden="true"><use href="#i-info"/></svg>
-        <span><b>Заказы и вопросы: WhatsApp <a href="tel:+79644881155">+7 964 488‑11‑55</a>.</b>
+        <span><b>Заказы и вопросы: WhatsApp <a href="tel:+79221114090">+7 922 111‑40‑90</a>.</b>
         Номер один на оба кафе, поэтому в сообщении всегда указано, какое из них готовит.</span>
       </p>
     </div>
@@ -778,9 +855,9 @@ dialog::backdrop{background:var(--scrim)}
 <footer class="foot">
   <div class="wrap foot-in">
     <span>© <span id="year">2026</span> «Добрый кебаб» · Екатеринбург</span>
-    <a class="foot-wa" href="https://wa.me/79644881155" target="_blank" rel="noopener">
+    <a class="foot-wa" href="https://wa.me/79221114090" target="_blank" rel="noopener">
       <svg width="18" height="18" fill="currentColor" aria-hidden="true"><use href="#i-wa"/></svg>
-      +7 964 488‑11‑55
+      +7 922 111‑40‑90
     </a>
   </div>
 </footer>
@@ -815,8 +892,9 @@ dialog::backdrop{background:var(--scrim)}
 
     <form id="orderForm" novalidate hidden>
       <div class="seg" role="radiogroup" aria-label="Способ получения">
-        <label><input type="radio" name="way" value="pickup" checked><span>Самовывоз</span></label>
-        <label><input type="radio" name="way" value="delivery"><span>Доставка<small>+600 ₽</small></span></label>
+        <label><input type="radio" name="way" value="pickup" checked><span>Самовывоз<small id="notePickup"></small></span></label>
+        <label><input type="radio" name="way" value="hall"><span>В зале<small id="noteHall">поем у вас</small></span></label>
+        <label><input type="radio" name="way" value="delivery"><span>Доставка<small id="noteDelivery">+600 ₽</small></span></label>
       </div>
 
       <div class="rows">
@@ -839,15 +917,25 @@ dialog::backdrop{background:var(--scrim)}
         </div>
 
         <div class="field">
-          <label for="time">Ко времени <span class="opt">(если не сейчас)</span></label>
+          <label for="time">Ко времени <span class="opt">(не дальше 2 часов)</span></label>
           <input id="time" name="time" type="time">
         </div>
       </div>
       <p class="hint" id="taxiHint" hidden>Доставка 600 ₽, уже добавлена к заказу.</p>
+      <p class="hint" id="hallHint" hidden>Поставим на стол к указанному времени. Не укажете — приготовим сразу.</p>
     </form>
   </div>
 
   <div class="sheet-foot" id="cartFoot" hidden>
+    <p class="warn" id="whenWarn" hidden>
+      <svg class="ico" aria-hidden="true"><use href="#i-info"/></svg>
+      <span id="whenWarnText"></span>
+    </p>
+    <p class="warn" id="coffeeWarn" hidden>
+      <svg class="ico" aria-hidden="true"><use href="#i-info"/></svg>
+      <span>Кофе не доставляем: <b id="coffeeWarnList"></b>. Уберите его из заказа
+      или выберите «Самовывоз» либо «В зале».</span>
+    </p>
     <p class="sum-line" id="sumItems" hidden><span>Позиции</span> <b class="num" id="sumGoods">0 ₽</b></p>
     <p class="sum-line" id="sumDelivery" hidden><span>Доставка</span> <b class="num" id="sumDeliveryVal">600 ₽</b></p>
     <p class="total"><span>Итого</span> <b class="num" id="total">0 ₽</b></p>
@@ -879,7 +967,7 @@ dialog::backdrop{background:var(--scrim)}
    Формат записи описан в комментарии в начале файла.
    ══════════════════════════════════════════════════════════ */
 
-const WA = '79644881155';
+const WA = '79221114090';
 
 /* Доставка стоит фиксированно и добавляется к заказу автоматически.
    Меняется здесь одним числом; 0 — доставка бесплатная. */
@@ -892,23 +980,26 @@ const DELIVERY = 600;
    и его присваивает кафе в ответном сообщении. */
 const ORDER_NUMBER_URL = '';
 
-/* Адреса, районы и часы — с карточек 2ГИС обоих филиалов.
-   open/close — местное время Екатеринбурга, h24 — круглосуточно.
-   2ГИС отмечает, что данные по де Геннина давно не обновлялись:
-   часы стоит подтвердить у владельца. */
+/* Адреса, районы и рейтинги — с карточек 2ГИС обоих филиалов,
+   часы — от заказчика (01.09.2026): в 2ГИС они устарели, там у
+   де Геннина 11:00–01:00, а у 8 Марта круглосуточно.
+   open/close — работа кухни, delivery — окно приёма доставки.
+   Всё в местном времени Екатеринбурга. */
 const CAFES = [
   {
     id:'genina', name:'Де Геннина',
     addr:'ул. Вильгельма де Геннина, 34, 1 этаж',
     area:'Академический район, 620105',
-    open:'11:00', close:'01:00', rating:'4.7', votes:151,
+    open:'08:00', close:'03:00', delivery:{open:'13:00', close:'03:00'},
+    rating:'4.7', votes:151,
     gis:'https://2gis.ru/ekaterinburg/branches/70000001030255589/firm/70000001103961708/60.519134%2C56.792379'
   },
   {
     id:'8marta', name:'8 Марта',
     addr:'ул. 8 Марта, 12',
     area:'Ленинский район, 620014',
-    h24:true, rating:'4.7', votes:193,
+    open:'12:00', close:'05:00', delivery:{open:'12:00', close:'05:00'},
+    rating:'4.7', votes:193,
     gis:'https://2gis.ru/ekaterinburg/branches/70000001030255589/firm/70000001082345008/60.599898%2C56.833412'
   }
 ];
@@ -929,7 +1020,7 @@ const CATS = [
   {id:'salad',     name:'Салаты',          only:'8marta'},
   {id:'grill',     name:'Шашлык',          only:'8marta'},
   {id:'veg',       name:'Овощи на углях',  only:'8marta'},
-  {id:'coffee',    name:'Кофе'},
+  {id:'coffee',    name:'Кофе', noDelivery:true},   /* горячее в стакане не доезжает */
   {id:'teapot',    name:'Чай в чайнике'},
   {id:'drink',     name:'Напитки'}
 ];
@@ -1227,16 +1318,104 @@ function ekbMinutes(){
   return h * 60 + m;
 }
 
+/* Оба филиала закрываются после полуночи (08:00 → 03:00), поэтому
+   окно считается через сутки, а не сравнением двух чисел. */
+const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+function inWindow(from, till, at){
+  const a = toMin(from), b = toMin(till), now = at === undefined ? ekbMinutes() : at;
+  return b > a ? (now >= a && now < b) : (now >= a || now < b);
+}
 function openState(c){
-  if (c.h24) return {open:true, text:'Открыто круглосуточно', hours:'Круглосуточно'};
-  const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-  const from = toMin(c.open), till = toMin(c.close), now = ekbMinutes();
-  /* Закрытие после полуночи (11:00 → 01:00) идёт через сутки. */
-  const open = till > from ? (now >= from && now < till) : (now >= from || now < till);
+  const open = inWindow(c.open, c.close);
   return {
     open,
     text: open ? `Открыто до ${c.close}` : `Откроется в ${c.open}`,
     hours: `Ежедневно ${c.open} — ${c.close}`
+  };
+}
+/* Окно доставки своё у каждого филиала: на 8 Марта совпадает с часами
+   кухни, а на де Геннина открывается на пять часов позже неё. */
+/* Заказ на сайте принимают не дальше чем на два часа вперёд: дальше
+   кухня планирует руками, и об этом договариваются по телефону. */
+const MAX_AHEAD = 120;
+/* Насколько раньше открытия оживает кнопка ДОСТАВКИ: к моменту, когда
+   поедет курьер, заказ уже должен лежать на кухне. Самовывоза и зала
+   это не касается — они открываются ровно во столько же, во сколько
+   кафе (заказчик поправил: на де Геннина в 07:30 всё должно быть
+   выключено). Величина своя, с двумя часами выше не связана. */
+const LEAD = 30;
+const wayWindow = (c, way) => way === 'delivery' ? c.delivery : {open:c.open, close:c.close};
+/* Сколько минут ждать до момента t. Через остаток от суток, иначе
+   23:30 → 00:30 читается как минус двадцать три часа. */
+const aheadMin = t => (toMin(t) - ekbMinutes() + 1440) % 1440;
+const fmtMin = m => String(Math.floor(m / 60)).padStart(2, '0') + ':'
+                  + String(m % 60).padStart(2, '0');
+
+/* Способ доступен, если его окно открыто сейчас. Доставке добавлено
+   полчаса форы до открытия, остальным — нет. */
+function wayOpen(c, way){
+  const w = wayWindow(c, way);
+  return inWindow(w.open, w.close)
+      || (way === 'delivery' && aheadMin(w.open) <= LEAD);
+}
+
+/* Что мешает отправить заказ прямо сейчас. null — ничего.
+   Проверяем не «сейчас», а тот момент, к которому гость просит:
+   в 12:00 заказать на 14:00 — обычное дело, на 16:00 — уже разговор
+   по телефону, кухня столько вперёд не планирует. */
+function whenProblem(){
+  const c = cafeById(cafe), way = wayNow(), w = wayWindow(c, way);
+  const wish = $('#time').value;
+  const label = {pickup:'Самовывоз', hall:'Заказ в зал', delivery:'Доставку'}[way];
+
+  if (wish && aheadMin(wish) > MAX_AHEAD)
+    /* Дальше двенадцати часов вперёд по кругу суток — это на деле
+       время, которое сегодня уже прошло: в 13:00 набрали 12:30.
+       Сказать «не дальше двух часов» тут значит запутать. */
+    return aheadMin(wish) > 720
+      ? `Время ${wish} на сегодня уже прошло. Назовите время в ближайшие `
+        + `два часа или договоритесь по телефону: ${PHONE_HUMAN}.`
+      : `На сайте принимаем заказы не дальше чем на два часа вперёд. `
+        + `Если нужно к ${wish}, договоритесь по телефону: ${PHONE_HUMAN}.`;
+
+  const at = wish ? toMin(wish) : ekbMinutes();
+  const live = wayOpen(c, way);
+  if (live && inWindow(w.open, w.close, at)) return null;
+
+  /* Предлагать «другой способ» можно, только если он и правда открыт
+     к этому моменту: у самовывоза и зала окно общее, и совет
+     переключиться между ними был бы издевательством. */
+  const others = ['pickup', 'hall', 'delivery'].filter(x => {
+    const o = wayWindow(c, x);
+    return x !== way && wayOpen(c, x) && inWindow(o.open, o.close, at);
+  });
+  const way_out = others.length
+    ? ' Выберите другой способ.'
+    : ` Договоритесь по телефону: ${PHONE_HUMAN}.`;
+
+  /* Две разные беды, и путать их нельзя. Первая: способ ещё не ожил —
+     время внутри окна тут ни при чём, в 07:30 нельзя оформить и на
+     08:15. Вторая: способ живой, а названный час в окно не попадает. */
+  if (!live){
+    const opens = fmtMin((toMin(w.open) - (way === 'delivery' ? LEAD : 0) + 1440) % 1440);
+    return `${label} на ${c.name} принимают с ${w.open} до ${w.close}`
+         + (opens === w.open ? '. Сейчас приём закрыт.'
+                             : `, оформить заказ можно с ${opens}. Сейчас рано.`)
+         + way_out;
+  }
+
+  return `${label} на ${c.name} принимают с ${w.open} до ${w.close}. `
+       + (wish ? `На ${wish} не получится — назовите время внутри этого окна.`
+               : 'Сейчас приём закрыт — укажите время внутри этого окна.')
+       + way_out;
+}
+
+function deliveryState(c){
+  const open = inWindow(c.delivery.open, c.delivery.close);
+  return {
+    open,
+    text: open ? `Принимаем до ${c.delivery.close}` : `Приём с ${c.delivery.open}`,
+    hours: `Ежедневно ${c.delivery.open} — ${c.delivery.close}`
   };
 }
 
@@ -1274,10 +1453,22 @@ const cartQty = () => Object.values(cart).reduce((a, b) => a + b, 0);
 
 /* Доставка платная и входит в итог. Считаем её отдельно от товаров,
    чтобы гость видел, из чего сложилась сумма. */
-const isDelivery = () => {
+const WAY_LABEL = {pickup:'Самовывоз', hall:'В зале', delivery:'Доставка'};
+const WAY_NOTE  = {pickup:'', hall:'поем у вас', delivery:'+600 ₽'};
+const PHONE_HUMAN = '+7 922 111‑40‑90';
+const wayNow = () => {
   const r = $('input[name="way"]:checked');
-  return !!r && r.value === 'delivery';
+  return r ? r.value : 'pickup';
 };
+const isDelivery = () => wayNow() === 'delivery';
+/* Кофе, чай и какао в стакане до адреса не доезжают: заказчик
+   отдаёт их только в кафе и с собой. Правило висит на категории —
+   понадобится добавить чайник, хватит одного слова в CATS. */
+const deliverable = item => !(catOf(item.c) || {}).noDelivery;
+const undeliverableInCart = () => Object.keys(cart).filter(k => {
+  const f = findKey(k);
+  return f && !deliverable(f.item);
+});
 const deliveryFee = () => (isDelivery() && cartQty() ? DELIVERY : 0);
 const orderTotal = () => cartSum() + deliveryFee();
 const cartSum = () => Object.entries(cart).reduce((sum, [key, qty]) => {
@@ -1326,6 +1517,12 @@ function cafeCard(c, withPick){
           </dd>
         </div>
         <div>
+          <dt>Доставка</dt>
+          <dd class="num">${esc(deliveryState(c).hours)}
+            <span class="state${deliveryState(c).open ? '' : ' shut'}">${esc(deliveryState(c).text)}</span>
+          </dd>
+        </div>
+        <div>
           <dt>Оценки в 2ГИС</dt>
           <dd class="num">${esc(c.rating)} из 5, ${c.votes} ${plural(c.votes,'оценка','оценки','оценок')}</dd>
         </div>
@@ -1366,8 +1563,11 @@ function pickCafe(id){
 
   if (!lost.length) return applyCafe(id);
 
+  $('#askTitle').textContent = 'Сменить кафе?';
   $('#askText').textContent =
     `В кафе на ${cafeById(id).name} этих позиций нет, из заказа они пропадут:`;
+  $('#askYes').textContent = 'Всё равно сменить';
+  $('#askNo').textContent  = 'Остаться';
   $('#askList').innerHTML = lost.map(n => `<li>${esc(n)}</li>`).join('');
   $('#askYes').onclick = () => {
     lost.forEach(n => delete cart[n]);
@@ -1398,6 +1598,17 @@ function renderChips(){
   $('#chips').innerHTML =
     chip('all', 'Всё', items.length) +
     used.map(c => chip(c.id, c.name, items.filter(i => i.c === c.id).length)).join('');
+  syncChipArrows();
+}
+
+/* Стрелка живёт только тогда, когда ей есть куда листать. Шесть
+   пикселей запаса — на дробную ширину: без них стрелка мигает
+   в самом конце ленты. */
+function syncChipArrows(){
+  const el = $('#chips');
+  const max = el.scrollWidth - el.clientWidth;
+  $('#chipsPrev').hidden = el.scrollLeft < 6;
+  $('#chipsNext').hidden = el.scrollLeft > max - 6;
 }
 
 /* Кадр показываем только у позиций с img: вперемешку с фото
@@ -1504,6 +1715,30 @@ function renderCart(){
   $('#sumItems').hidden = !fee;                  /* без доставки разбивка лишняя */
   $('#sumDelivery').hidden = !fee;
 
+  /* Кофе в заказе вместе с доставкой. Такое сочетание возможно:
+     меню не гаснет, и позицию можно добавить уже после выбора способа.
+     Пишем прямо в корзине и не даём отправить, пока не разошлись. */
+  /* Способ, которым сейчас не заказать, гасим прямо на переключателе,
+     а вместо подписи ставим час открытия: «нельзя» без «когда можно» —
+     это тупик. Выбранный способ не переставляем сами: молча менять
+     решение гостя хуже, чем показать, почему оно не проходит. */
+  const c = cafeById(cafe);
+  ['pickup', 'hall', 'delivery'].forEach(way => {
+    const ok = wayOpen(c, way);
+    const w = wayWindow(c, way);
+    $(`input[name="way"][value="${way}"]`).disabled = !ok;
+    $('#note' + way[0].toUpperCase() + way.slice(1)).textContent =
+      ok ? WAY_NOTE[way] : 'с ' + w.open;
+  });
+
+  const problem = whenProblem();
+  $('#whenWarn').hidden = !problem;
+  if (problem) $('#whenWarnText').textContent = problem;
+
+  const stuck = isDelivery() ? undeliverableInCart() : [];
+  $('#coffeeWarn').hidden = !stuck.length;
+  if (stuck.length) $('#coffeeWarnList').textContent = stuck.join(', ');
+
   $('#cartEmpty').hidden = qty > 0;
   $('#lines').hidden = qty === 0;
   $('#orderForm').hidden = qty === 0;
@@ -1574,7 +1809,7 @@ function buildText(num){
     num ? `Заказ №${num} с сайта «Добрый кебаб»` : 'Заказ с сайта «Добрый кебаб»',
     '',
     `Кафе: ${c.name}, ${c.addr}`,
-    `Способ: ${way === 'delivery' ? 'Доставка' : 'Самовывоз'}`,
+    `Способ: ${WAY_LABEL[way] || WAY_LABEL.pickup}`,
     way === 'delivery' ? `Адрес: ${$('#addr').value.trim()}` : null,
     `Когда: ${when}`,
     '',
@@ -1611,6 +1846,8 @@ function validate(el){
   return ok;
 }
 
+$('#time').addEventListener('input', renderCart);
+
 ['name', 'phone', 'addr'].forEach(id => {
   const el = $('#' + id);
   el.addEventListener('blur', () => validate(el));
@@ -1640,6 +1877,13 @@ document.addEventListener('click', e => {
   if (pick) pickCafe(pick.dataset.pick);
 });
 
+$('#chips').addEventListener('scroll', syncChipArrows, {passive:true});
+addEventListener('resize', syncChipArrows);
+$$('.chips-arr').forEach(b => b.addEventListener('click', () => {
+  const el = $('#chips');
+  el.scrollBy({left: Number(b.dataset.dir) * el.clientWidth * 0.75});
+}));
+
 $('#swapCafe').addEventListener('click', () => {
   const i = CAFES.findIndex(c => c.id === cafe);
   pickCafe(CAFES[(i + 1) % CAFES.length].id);
@@ -1648,17 +1892,55 @@ $('#swapCafe').addEventListener('click', () => {
 $('#askNo').addEventListener('click', () => $('#ask').close());
 
 /* Фон не уезжает сам: блокировку держит html:has(dialog[open]) в CSS. */
-const openCart = () => $('#cart').showModal();
+const openCart = () => { renderCart(); $('#cart').showModal(); };
+/* Окна привязаны к часам, а корзина может стоять открытой долго.
+   Пересчитываем раз в минуту и только пока она видна. */
+setInterval(() => { if ($('#cart').open) renderCart(); }, 60000);
 $('#openCart').addEventListener('click', openCart);
 $('#dockBtn').addEventListener('click', openCart);
 
+/* Способ, который сейчас применён. Нужен, чтобы вернуть переключатель
+   на место, если гость передумал убирать кофе ради доставки. */
+let wayPrev = 'pickup';
+
+function applyWay(){
+  const way = wayNow();
+  wayPrev = way;
+  $('#fAddr').hidden   = way !== 'delivery';
+  $('#taxiHint').hidden = way !== 'delivery';
+  $('#hallHint').hidden = way !== 'hall';
+  if (way !== 'delivery') fieldOf($('#addr')).classList.remove('invalid');
+  render();          /* доставка меняет итог */
+}
+
 $$('input[name="way"]').forEach(r => r.addEventListener('change', () => {
-  const delivery = isDelivery();
-  $('#fAddr').hidden = !delivery;
-  $('#taxiHint').hidden = !delivery;
-  if (!delivery) fieldOf($('#addr')).classList.remove('invalid');
-  renderCart();                    /* доставка меняет итог */
+  /* Молча выбросить оплаченное вниманием гостя нельзя: спрашиваем
+     тем же диалогом, что и при смене кафе. */
+  const lost = isDelivery() ? undeliverableInCart() : [];
+  if (!lost.length) return applyWay();
+
+  $('#askTitle').textContent = 'Кофе не доставляем';
+  $('#askText').textContent =
+    'Горячее в стакане до адреса не доезжает. Если выбрать доставку, из заказа пропадёт:';
+  $('#askList').innerHTML = lost.map(n => `<li>${esc(n)}</li>`).join('');
+  $('#askYes').textContent = 'Убрать и оформить доставку';
+  $('#askNo').textContent  = 'Оставить кофе';
+  $('#askYes').onclick = () => {
+    lost.forEach(n => delete cart[n]);
+    store.set(KEY_CART, cart);
+    applyWay();               /* до close: иначе обработчик ниже вернёт способ */
+    $('#ask').close();
+    say(`Убрали из заказа: ${lost.join(', ')}.`);
+  };
+  $('#ask').showModal();
 }));
+
+/* Диалог закрыли, не подтвердив, — переключатель возвращается сам.
+   Если способ уже применён, wayPrev совпадает и строка ничего не делает. */
+$('#ask').addEventListener('close', () => {
+  const r = $(`input[name="way"][value="${wayPrev}"]`);
+  if (r && !r.checked) r.checked = true;
+});
 
 /* Номер берём из общей таблицы — она одна на всех гостей, поэтому
    номера не совпадают. Если таблица не настроена, не ответила за
@@ -1676,7 +1958,7 @@ async function takeNumber(){
     const q = new URLSearchParams({
       cafe: cafe,
       cafeName: c.name,
-      way: $('input[name="way"]:checked').value === 'delivery' ? 'Доставка' : 'Самовывоз',
+      way: WAY_LABEL[wayNow()] || WAY_LABEL.pickup,
       name: $('#name').value.trim(),
       phone: $('#phone').value.trim(),
       addr: $('#fAddr').hidden ? '' : $('#addr').value.trim(),
@@ -1697,6 +1979,21 @@ async function takeNumber(){
 $('#send').addEventListener('click', async () => {
   const btn = $('#send');
   if (btn.dataset.busy) return;            /* двойное нажатие сожгло бы два номера */
+
+  const stuck = isDelivery() ? undeliverableInCart() : [];
+  if (stuck.length){
+    $('#coffeeWarn').scrollIntoView({block:'center', behavior:'smooth'});
+    say(`Кофе не доставляем: ${stuck.join(', ')}. Уберите его или смените способ.`);
+    return;
+  }
+
+  const problem = whenProblem();
+  if (problem){
+    renderCart();                       /* строка могла устареть за время набора */
+    $('#whenWarn').scrollIntoView({block:'center', behavior:'smooth'});
+    say(problem);
+    return;
+  }
 
   const need = ['name', 'phone'];
   if (!$('#fAddr').hidden) need.push('addr');
