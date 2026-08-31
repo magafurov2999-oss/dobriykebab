@@ -917,7 +917,7 @@ dialog::backdrop{background:var(--scrim)}
         </div>
 
         <div class="field">
-          <label for="time">Ко времени <span class="opt">(не дальше 2 часов)</span></label>
+          <label for="time">Ко времени <span class="opt" id="timeLimit">(не дальше 2 часов)</span></label>
           <input id="time" name="time" type="time">
         </div>
       </div>
@@ -1375,8 +1375,9 @@ function whenProblem(){
     return aheadMin(wish) > 720
       ? `Время ${wish} на сегодня уже прошло. Назовите время в ближайшие `
         + `два часа или договоритесь по телефону: ${PHONE_HUMAN}.`
-      : `На сайте принимаем заказы не дальше чем на два часа вперёд. `
-        + `Если нужно к ${wish}, договоритесь по телефону: ${PHONE_HUMAN}.`;
+      : `На сайте принимаем заказы не дальше чем на два часа вперёд — сейчас `
+        + `это до ${fmtMin((ekbMinutes() + MAX_AHEAD) % 1440)}. Если нужно к ${wish}, `
+        + `договоритесь по телефону: ${PHONE_HUMAN}.`;
 
   const at = wish ? toMin(wish) : ekbMinutes();
   const live = wayOpen(c, way);
@@ -1677,6 +1678,32 @@ function stepper(name, qty, addLabel){
     </div>`;
 }
 
+/* Всё, что зависит от часов: доступность способов и строка запрета.
+   Отдельно от renderCart, потому что перебирается по таймеру — трогать
+   при этом список позиций незачем, а под пальцем он ещё и дёргался бы.
+
+   Способ, которым сейчас не заказать, гасим прямо на переключателе,
+   а вместо подписи ставим час открытия: «нельзя» без «когда можно» —
+   это тупик. Выбранный способ не переставляем сами: молча менять
+   решение гостя хуже, чем показать, почему оно не проходит. */
+function syncWhen(){
+  const c = cafeById(cafe);
+  ['pickup', 'hall', 'delivery'].forEach(way => {
+    const ok = wayOpen(c, way);
+    $(`input[name="way"][value="${way}"]`).disabled = !ok;
+    $('#note' + way[0].toUpperCase() + way.slice(1)).textContent =
+      ok ? WAY_NOTE[way] : 'с ' + wayWindow(c, way).open;
+  });
+
+  /* Граница подвижна: в 02:00 предел 04:00, в 02:15 уже 04:15.
+     Держим её на виду, иначе запрет выглядит беспричинным. */
+  $('#timeLimit').textContent = `(не дальше ${fmtMin((ekbMinutes() + MAX_AHEAD) % 1440)})`;
+
+  const problem = whenProblem();
+  $('#whenWarn').hidden = !problem;
+  if (problem) $('#whenWarnText').textContent = problem;
+}
+
 /* Позиции всегда сгруппированы по категориям: 27 строк подряд без
    заголовков читаются как свалка, и глазу не за что зацепиться. */
 function renderList(){
@@ -1718,22 +1745,7 @@ function renderCart(){
   /* Кофе в заказе вместе с доставкой. Такое сочетание возможно:
      меню не гаснет, и позицию можно добавить уже после выбора способа.
      Пишем прямо в корзине и не даём отправить, пока не разошлись. */
-  /* Способ, которым сейчас не заказать, гасим прямо на переключателе,
-     а вместо подписи ставим час открытия: «нельзя» без «когда можно» —
-     это тупик. Выбранный способ не переставляем сами: молча менять
-     решение гостя хуже, чем показать, почему оно не проходит. */
-  const c = cafeById(cafe);
-  ['pickup', 'hall', 'delivery'].forEach(way => {
-    const ok = wayOpen(c, way);
-    const w = wayWindow(c, way);
-    $(`input[name="way"][value="${way}"]`).disabled = !ok;
-    $('#note' + way[0].toUpperCase() + way.slice(1)).textContent =
-      ok ? WAY_NOTE[way] : 'с ' + w.open;
-  });
-
-  const problem = whenProblem();
-  $('#whenWarn').hidden = !problem;
-  if (problem) $('#whenWarnText').textContent = problem;
+  syncWhen();
 
   const stuck = isDelivery() ? undeliverableInCart() : [];
   $('#coffeeWarn').hidden = !stuck.length;
@@ -1893,9 +1905,11 @@ $('#askNo').addEventListener('click', () => $('#ask').close());
 
 /* Фон не уезжает сам: блокировку держит html:has(dialog[open]) в CSS. */
 const openCart = () => { renderCart(); $('#cart').showModal(); };
-/* Окна привязаны к часам, а корзина может стоять открытой долго.
-   Пересчитываем раз в минуту и только пока она видна. */
-setInterval(() => { if ($('#cart').open) renderCart(); }, 60000);
+/* Окна и предел «двух часов» ползут вместе с часами, а корзина может
+   стоять открытой долго. Раз в минуту оказалось мало: заказчик увидел
+   запрет, который к тому моменту уже перестал быть правдой. Сверяем
+   каждые пятнадцать секунд — и только пока корзина видна. */
+setInterval(() => { if ($('#cart').open) syncWhen(); }, 15000);
 $('#openCart').addEventListener('click', openCart);
 $('#dockBtn').addEventListener('click', openCart);
 
@@ -1987,9 +2001,13 @@ $('#send').addEventListener('click', async () => {
     return;
   }
 
+  /* Пока гость набирал имя и телефон, часы шли: строка запрета могла
+     и появиться, и перестать быть правдой. Сверяем перед решением,
+     а не после — иначе на экране остаётся красное после удачной
+     отправки. */
+  syncWhen();
   const problem = whenProblem();
   if (problem){
-    renderCart();                       /* строка могла устареть за время набора */
     $('#whenWarn').scrollIntoView({block:'center', behavior:'smooth'});
     say(problem);
     return;
