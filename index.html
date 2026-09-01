@@ -329,6 +329,33 @@ p,li{text-wrap:pretty}
 .proof b.on{color:var(--green-hi)}
 .proof span{display:block;margin-top:7px;font-size:13.5px;color:var(--paper-dim);line-height:1.35}
 
+/* Кафе два, а довод о часах один — он бежит справа налево бегущей
+   строкой. Движение живёт внутри своей ячейки: она подрезает ленту,
+   и на соседний довод «4.7» ничего не наезжает.
+
+   min-width:0 обязателен. Ячейка — элемент флексбокса, а лента внутри
+   шире неё; без этой строки ячейка растянулась бы по ленте и разложила
+   первый экран.
+
+   Зазор задан внутренним полем самих блоков, а не gap: тогда лента
+   ровно вдвое шире одной копии, и сдвиг на -50% попадает в стык
+   без щели и без нахлёста. С gap стык уезжал бы на ползазора. */
+.roll{overflow:hidden;min-width:0;
+  /* По краям ячейки текст иначе рубится посреди буквы. Маска гасит
+     его на входе и на выходе — заодно отделяет ленту от соседнего
+     довода. Не поддержана — вернётся обычный ровный срез. */
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%)}
+.roll-track{display:flex;width:max-content;
+  animation:roll-left var(--roll-time,20s) linear infinite}
+.roll-item{flex:0 0 auto;padding-right:clamp(30px,4vw,56px)}
+@keyframes roll-left{from{transform:translateX(0)} to{transform:translateX(-50%)}}
+/* Под курсором строка встаёт: бегущий текст иначе не дочитать.
+   Это же и есть механизм остановки движения для того, кому оно мешает. */
+.roll:hover .roll-track{animation-play-state:paused}
+/* Кому движение противопоказано — лента стоит, виден первый филиал. */
+@media (prefers-reduced-motion:reduce){ .roll-track{animation:none} }
+
 .hero-cta{display:flex;flex-wrap:wrap;gap:10px}
 
 /* Красного поля вокруг логотипа больше нет (заказчик, 01.09.2026):
@@ -521,8 +548,9 @@ dialog::backdrop{background:var(--scrim)}
 .sheet{position:fixed;inset:0 0 0 auto;margin:0;width:min(560px,100%);height:100%;
   background:var(--ink-2);border-left:1px solid var(--hair-2);display:none;flex-direction:column}
 .sheet[open]{display:flex}
-/* Единственный поставленный момент движения на всей странице:
-   лист входит один раз, строки заказа проявляются следом. */
+/* Один из двух поставленных моментов движения на странице (второй —
+   бегущая строка с часами на первом экране): лист входит один раз,
+   строки заказа проявляются следом. */
 .sheet[open]{animation:sheet-in .34s var(--ease) both}
 @keyframes sheet-in{from{transform:translateX(26px);opacity:0}to{transform:none;opacity:1}}
 .sheet[open] .line{animation:line-in .3s var(--ease) both;animation-delay:calc(90ms + var(--i) * 40ms)}
@@ -769,7 +797,7 @@ dialog::backdrop{background:var(--scrim)}
              стояло «Два кафе» — это не довод, он и так звучит в
              подводке, а строку фактов ломал переносом. -->
         <ul class="proof">
-          <li><b class="on">До 5 утра</b><span>на 8 Марта, 12</span></li>
+          <li class="roll" id="hoursRoll"></li>
           <li><b>4.7</b><span>344 оценки в 2ГИС</span></li>
         </ul>
 
@@ -984,10 +1012,13 @@ const ORDER_NUMBER_URL = '';
    часы — от заказчика (01.09.2026): в 2ГИС они устарели, там у
    де Геннина 11:00–01:00, а у 8 Марта круглосуточно.
    open/close — работа кухни, delivery — окно приёма доставки.
-   Всё в местном времени Екатеринбурга. */
+   Всё в местном времени Екатеринбурга.
+   short — пометка филиала в сообщении на кухню. Отдельно от name
+   и addr, потому что вместе они двоились: «8 Марта, ул. 8 Марта, 12».
+   Кухне нужен различитель, а не почтовый адрес — свой она знает. */
 const CAFES = [
   {
-    id:'genina', name:'Де Геннина',
+    id:'genina', name:'Де Геннина', short:'Де Геннина, 34',
     addr:'ул. Вильгельма де Геннина, 34, 1 этаж',
     area:'Академический район, 620105',
     open:'08:00', close:'03:00', delivery:{open:'13:00', close:'03:00'},
@@ -995,7 +1026,7 @@ const CAFES = [
     gis:'https://2gis.ru/ekaterinburg/branches/70000001030255589/firm/70000001103961708/60.519134%2C56.792379'
   },
   {
-    id:'8marta', name:'8 Марта',
+    id:'8marta', name:'8 Марта', short:'8 Марта, 12',
     addr:'ул. 8 Марта, 12',
     area:'Ленинский район, 620014',
     open:'12:00', close:'05:00', delivery:{open:'12:00', close:'05:00'},
@@ -1497,6 +1528,47 @@ function say(text){
 /* ══════════════════════════════════════════════════════════
    ФИЛИАЛЫ
    ══════════════════════════════════════════════════════════ */
+/* Довод о часах на первом экране: два кафе — два разных «до скольки».
+   Строку собираем из данных филиала, а не пишем руками: поменяются
+   часы — поменяется и первый экран, врать он не начнёт. */
+function tillWord(close){
+  const [h, m] = close.split(':').map(Number);
+  const part = h <= 3 ? 'ночи' : h < 12 ? 'утра' : h < 17 ? 'дня' : 'вечера';
+  return `До ${m ? h + ':' + String(m).padStart(2, '0') : h} ${part}`;
+}
+
+/* Бегущая строка, а не карусель во весь экран: движение живёт внутри
+   своей ячейки. Лента склеена из двух одинаковых копий и едет ровно
+   на половину себя — в этот миг вторая копия оказывается там, где
+   начиналась первая, и шов не виден. Возврата к началу нет, поэтому
+   и рывка нет. */
+function startHoursRoll(){
+  const box = $('#hoursRoll');
+  /* Первым идёт то кафе, в котором гость сейчас: пришёл по QR
+     на 8 Марта — про 8 Марта и читает, а не про соседний филиал. */
+  const from = Math.max(0, CAFES.findIndex(c => c.id === cafe));
+  const order = CAFES.slice(from).concat(CAFES.slice(0, from));
+  const copy = order.map(c => `
+    <div class="roll-item">
+      <b class="on">${esc(tillWord(c.close))}</b>
+      <span>на ${esc(c.short)}</span>
+    </div>`).join('');
+  /* Вторая копия — только для глаз: экранному диктору незачем читать
+     одно и то же дважды. */
+  box.innerHTML = `<div class="roll-track">${copy}`
+                + `<span aria-hidden="true" style="display:contents">${copy}</span></div>`;
+
+  /* Скорость держим в пикселях в секунду, а не в секундах на круг:
+     иначе на широком экране лента летела бы, а на телефоне ползла. */
+  const track = $('.roll-track', box);
+  const speed = () => {
+    const w = track.offsetWidth / 2;
+    if (w) track.style.setProperty('--roll-time', (w / 45).toFixed(1) + 's');
+  };
+  speed();
+  addEventListener('resize', speed);
+}
+
 function cafeCard(c, withPick){
   const cur = c.id === cafe;
   const st = openState(c);
@@ -1697,7 +1769,10 @@ function syncWhen(){
 
   /* Граница подвижна: в 02:00 предел 04:00, в 02:15 уже 04:15.
      Держим её на виду, иначе запрет выглядит беспричинным. */
-  $('#timeLimit').textContent = `(не дальше ${fmtMin((ekbMinutes() + MAX_AHEAD) % 1440)})`;
+  /* Часовой пояс назван вслух: гость не из Екатеринбурга наберёт
+     «к 20:00», имея в виду своё время, и приедет на два часа мимо. */
+  $('#timeLimit').textContent =
+    `(не дальше ${fmtMin((ekbMinutes() + MAX_AHEAD) % 1440)} по Екатеринбургу)`;
 
   const problem = whenProblem();
   $('#whenWarn').hidden = !problem;
@@ -1820,7 +1895,7 @@ function buildText(num){
   return [
     num ? `Заказ №${num} с сайта «Добрый кебаб»` : 'Заказ с сайта «Добрый кебаб»',
     '',
-    `Кафе: ${c.name}, ${c.addr}`,
+    `Кафе: ${c.short}`,
     `Способ: ${WAY_LABEL[way] || WAY_LABEL.pickup}`,
     way === 'delivery' ? `Адрес: ${$('#addr').value.trim()}` : null,
     `Когда: ${when}`,
@@ -2087,6 +2162,7 @@ store.set(KEY_CAFE, cafe);
 })();
 
 render();
+startHoursRoll();
 </script>
 </body>
 </html>
